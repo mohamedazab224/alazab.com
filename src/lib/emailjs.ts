@@ -1,5 +1,5 @@
 
-import emailjs from 'emailjs-com';
+import emailjs from '@emailjs/browser';
 
 // تهيئة EmailJS
 emailjs.init('18ygGgryRoGve-Tpw');
