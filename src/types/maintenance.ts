@@ -30,7 +30,6 @@ export enum MaintenanceStep {
   SUBMISSION = 5
 }
 
-// Actualizar la interfaz para que coincida con las columnas de la base de datos
 export interface MaintenanceRequestDetails {
   id: string;
   request_number?: string;
@@ -54,7 +53,7 @@ export interface AttachmentDetails {
   uploaded_at: string;
 }
 
-// Definir interfaz para maintenance_requests de la base de datos
+// Database interface for maintenance_requests table
 export interface MaintenanceRequestDB {
   id?: string;
   title: string;
@@ -62,8 +61,8 @@ export interface MaintenanceRequestDB {
   description: string;
   priority: string;
   scheduled_date: string;
-  estimated_cost: string | null;
-  actual_cost?: string | null;
+  estimated_cost: number | null;  // Changed from string to number
+  actual_cost?: number | null;    // Changed from string to number
   status: string;
   created_at?: string;
   updated_at?: string;
@@ -75,7 +74,7 @@ export interface MaintenanceRequestDB {
   is_deleted?: boolean;
 }
 
-// Definir interfaz para attachments de la base de datos
+// Database interface for attachments table
 export interface AttachmentDB {
   id?: string;
   request_id: string;

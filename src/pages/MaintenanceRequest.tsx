@@ -93,24 +93,27 @@ const MaintenancePage: React.FC = () => {
         description: formData.description,
         priority: formData.priority,
         scheduled_date: formData.requestedDate,
-        estimated_cost: formData.estimatedCost || null,
+        estimated_cost: formData.estimatedCost ? parseFloat(formData.estimatedCost) : null,
         status: 'pending',
         created_at: new Date().toISOString()
       };
         
-      const { error: dbError } = await supabase
+      const { data: insertedRequest, error: dbError } = await supabase
         .from('maintenance_requests')
-        .insert(requestData);
+        .insert(requestData)
+        .select();
         
       if (dbError) {
         console.error('خطأ في حفظ بيانات الطلب:', dbError);
         throw new Error('حدث خطأ في حفظ البيانات');
       }
       
+      const requestId = insertedRequest ? insertedRequest[0]?.id : reqNumber;
+      
       // إضافة المرفقات إلى جدول المرفقات إذا وجدت
       if (fileUrls.length > 0) {
         const attachmentsData: AttachmentDB[] = fileUrls.map((url, index) => ({
-          request_id: reqNumber,
+          request_id: requestId,
           file_url: url,
           description: `مرفق للطلب رقم ${reqNumber}`,
           uploaded_at: new Date().toISOString()
