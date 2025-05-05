@@ -11,43 +11,49 @@ const SubmissionStep: React.FC<SubmissionStepProps> = ({ requestNumber }) => {
   const navigate = useNavigate();
   
   return (
-    <div className="text-center space-y-6 max-w-md mx-auto">
-      <div className="flex justify-center">
-        <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
-            <polyline points="20 6 9 17 4 12"></polyline>
+    <div className="py-8 text-center">
+      <div className="flex justify-center mb-6">
+        <div className="rounded-full bg-green-100 p-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
         </div>
       </div>
       
-      <h2 className="text-2xl font-bold">تم إرسال طلبك بنجاح!</h2>
+      <h2 className="text-2xl font-bold mb-4">تم إرسال طلب الصيانة بنجاح!</h2>
       
-      <p className="text-gray-600">
-        تم استلام طلب الصيانة الخاص بك وسيتم مراجعته في أقرب وقت.
-      </p>
-      
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <p className="text-gray-500">رقم الطلب</p>
-        <p className="text-xl font-bold">{requestNumber}</p>
+      <div className="mb-6 max-w-md mx-auto">
+        <p className="text-gray-600 mb-4">
+          لقد استلمنا طلب الصيانة الخاص بك وسنقوم بمراجعته في أقرب وقت ممكن.
+        </p>
+        
+        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <p className="text-sm text-gray-500 mb-1">رقم الطلب الخاص بك:</p>
+          <p className="text-xl font-bold text-construction-primary">{requestNumber}</p>
+          <p className="text-sm text-gray-500 mt-2">يرجى الاحتفاظ بهذا الرقم للمتابعة</p>
+        </div>
+        
+        <p className="text-sm text-gray-600">
+          سيتم إرسال تفاصيل الطلب إلى البريد الإلكتروني المسجل لدينا.
+          سيقوم فريقنا بالتواصل معكم قريباً.
+        </p>
       </div>
       
-      <p className="text-sm text-gray-500">
-        يمكنك متابعة حالة طلبك من خلال رقم الطلب. سيتم التواصل معك قريباً.
-      </p>
-      
-      <div className="flex flex-col space-y-3">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
         <Button
           onClick={() => navigate('/')}
-          className="bg-construction-primary text-white"
+          variant="outline"
+          className="w-full sm:w-auto"
         >
-          العودة للرئيسية
+          العودة إلى الصفحة الرئيسية
         </Button>
         
         <Button
-          onClick={() => navigate('/maintenance-request')}
-          variant="outline"
+          onClick={() => navigate('/maintenance-tracking', { state: { requestNumber } })}
+          className="w-full sm:w-auto bg-construction-primary text-white"
         >
-          طلب صيانة جديد
+          متابعة حالة الطلب
         </Button>
       </div>
     </div>

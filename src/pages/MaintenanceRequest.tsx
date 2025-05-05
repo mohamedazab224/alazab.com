@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { MaintenanceStep, MaintenanceRequest } from '@/types/maintenance';
 import { sendEmail } from '@/lib/emailjs';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 import StepIndicator from '@/components/maintenance/StepIndicator';
 import BasicInfoStep from '@/components/maintenance/BasicInfoStep';
@@ -74,10 +74,17 @@ const MaintenancePage: React.FC = () => {
           return null;
         }
         
-        return data?.path;
+        // إنشاء URL للملف المرفوع
+        const fileUrl = supabase.storage
+          .from('maintenance-attachments')
+          .getPublicUrl(data?.path || '').data.publicUrl;
+        
+        return { path: data?.path, url: fileUrl };
       });
       
       const uploadedFiles = await Promise.all(uploadPromises);
+      const filePaths = uploadedFiles.filter(Boolean).map(file => file?.path);
+      const fileUrls = uploadedFiles.filter(Boolean).map(file => file?.url);
       
       // حفظ المعلومات في قاعدة البيانات
       const { error: dbError } = await supabase
@@ -89,14 +96,33 @@ const MaintenancePage: React.FC = () => {
           title: formData.title,
           description: formData.description,
           priority: formData.priority,
-          requested_date: formData.requestedDate,
+          scheduled_date: formData.requestedDate,
           estimated_cost: formData.estimatedCost || null,
-          file_paths: uploadedFiles.filter(Boolean),
-          status: 'pending'
+          status: 'pending',
+          created_at: new Date()
         });
         
       if (dbError) {
+        console.error('خطأ في حفظ بيانات الطلب:', dbError);
         throw new Error('حدث خطأ في حفظ البيانات');
+      }
+      
+      // إضافة المرفقات إلى جدول المرفقات إذا وجدت
+      if (filePaths.length > 0) {
+        const attachmentsData = filePaths.map((path, index) => ({
+          request_id: reqNumber,
+          file_url: fileUrls[index],
+          description: `مرفق للطلب رقم ${reqNumber}`,
+          uploaded_at: new Date()
+        }));
+        
+        const { error: attachError } = await supabase
+          .from('attachments')
+          .insert(attachmentsData);
+          
+        if (attachError) {
+          console.error('خطأ في حفظ بيانات المرفقات:', attachError);
+        }
       }
       
       // إرسال البريد الإلكتروني
@@ -113,6 +139,11 @@ const MaintenancePage: React.FC = () => {
       };
       
       await sendEmail(emailParams);
+      toast({
+        title: "تم إرسال الطلب بنجاح",
+        description: `تم إنشاء طلب الصيانة برقم ${reqNumber}`,
+        variant: "default",
+      });
       
       // انتقال إلى خطوة التأكيد
       nextStep();
