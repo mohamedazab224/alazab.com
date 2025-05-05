@@ -8,7 +8,7 @@ export default {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-	],
+  ],
   theme: {
     container: {
       center: true,
@@ -26,9 +26,11 @@ export default {
         foreground: "hsl(var(--foreground))",
         // تحديث الألوان المخصصة للبناء
         construction: {
-          primary: "#008F8F", // تعديل للون العلامة التجارية
-          secondary: "#E8AA33",
-          tertiary: "#333333"
+          primary: "#008F8F", // الحفاظ على اللون الأصلي
+          secondary: "#E8AA33", // الحفاظ على اللون الأصلي
+          tertiary: "#333333",
+          accent: "#E8AA33",
+          dark: "#006666"
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",
@@ -93,7 +95,7 @@ export default {
             transform: "translateY(10px)"
           }
         },
-        "slide-up": {  // Añadiendo la animación que falta
+        "slide-up": {
           "0%": {
             opacity: "0",
             transform: "translateY(20px)"
@@ -103,7 +105,7 @@ export default {
             transform: "translateY(0)"
           }
         },
-        "slide-down": {  // Añadiendo animación complementaria
+        "slide-down": {
           "0%": {
             opacity: "1",
             transform: "translateY(0)"
@@ -119,7 +121,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
         "fade-out": "fade-out 0.3s ease-out",
-        "slide-up": "slide-up 0.3s ease-out",  // Configurando la nueva animación
+        "slide-up": "slide-up 0.3s ease-out",
         "slide-down": "slide-down 0.3s ease-out",
       },
     },

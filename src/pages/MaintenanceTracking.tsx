@@ -75,16 +75,16 @@ const MaintenanceTracking: React.FC = () => {
       // تحويل البيانات من قاعدة البيانات إلى نوع البيانات المطلوب
       const details: MaintenanceRequestDetails = {
         id: requestData.id,
-        request_number: requestNumber, // إضافة الرقم المستخدم في البحث
+        request_number: requestNumber,
         title: requestData.title,
         description: requestData.description,
-        branch: "غير محدد", // إضافة قيمة افتراضية للفرع
+        branch: "غير محدد",
         service_type: requestData.service_type,
         priority: requestData.priority,
         status: requestData.status,
         scheduled_date: requestData.scheduled_date,
-        estimated_cost: requestData.estimated_cost ? String(requestData.estimated_cost) : null, // تحويل إلى نص
-        actual_cost: requestData.actual_cost ? String(requestData.actual_cost) : null, // تحويل إلى نص
+        estimated_cost: requestData.estimated_cost ? String(requestData.estimated_cost) : null,
+        actual_cost: requestData.actual_cost ? String(requestData.actual_cost) : null,
         created_at: requestData.created_at,
         completion_date: requestData.completion_date
       };
@@ -104,7 +104,7 @@ const MaintenanceTracking: React.FC = () => {
       console.error('خطأ في جلب بيانات الطلب:', error);
       toast({
         title: "تعذر العثور على الطلب",
-        description: "الرجاء التأكد من رقم الطلب والمحاولة مرة أخرى",
+        description: "الرجاء التأكد من رقم الطلب وال��حاولة مرة أخرى",
         variant: "destructive"
       });
       setRequestDetails(null);

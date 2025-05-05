@@ -61,8 +61,8 @@ export interface MaintenanceRequestDB {
   description: string;
   priority: string;
   scheduled_date: string;
-  estimated_cost: number | null;  // Changed from string to number
-  actual_cost?: number | null;    // Changed from string to number
+  estimated_cost: number | null;
+  actual_cost?: number | null;
   status: string;
   created_at?: string;
   updated_at?: string;
