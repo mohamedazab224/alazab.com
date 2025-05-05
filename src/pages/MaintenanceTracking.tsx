@@ -83,8 +83,8 @@ const MaintenanceTracking: React.FC = () => {
         priority: requestData.priority,
         status: requestData.status,
         scheduled_date: requestData.scheduled_date,
-        estimated_cost: requestData.estimated_cost,
-        actual_cost: requestData.actual_cost,
+        estimated_cost: requestData.estimated_cost ? String(requestData.estimated_cost) : null, // تحويل إلى نص
+        actual_cost: requestData.actual_cost ? String(requestData.actual_cost) : null, // تحويل إلى نص
         created_at: requestData.created_at,
         completion_date: requestData.completion_date
       };
@@ -140,7 +140,7 @@ const MaintenanceTracking: React.FC = () => {
             <div className="text-center mb-8">
               <div className="flex justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-construction-primary">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
               </div>

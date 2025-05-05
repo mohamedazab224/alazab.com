@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { toast } from "@/components/ui/use-toast";
-import { MaintenanceStep, MaintenanceRequest } from '@/types/maintenance';
+import { MaintenanceStep, MaintenanceRequest, MaintenanceRequestDB, AttachmentDB } from '@/types/maintenance';
 import { sendEmail } from '@/lib/emailjs';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -86,18 +87,20 @@ const MaintenancePage: React.FC = () => {
       const fileUrls = uploadedFiles.filter(Boolean).map(file => file?.url);
       
       // حفظ المعلومات في قاعدة البيانات
+      const requestData: MaintenanceRequestDB = {
+        title: formData.title,
+        service_type: formData.serviceType,
+        description: formData.description,
+        priority: formData.priority,
+        scheduled_date: formData.requestedDate,
+        estimated_cost: formData.estimatedCost || null,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
+        
       const { error: dbError } = await supabase
         .from('maintenance_requests')
-        .insert({
-          title: formData.title,
-          service_type: formData.serviceType,
-          description: formData.description,
-          priority: formData.priority,
-          scheduled_date: formData.requestedDate,
-          estimated_cost: formData.estimatedCost || null,
-          status: 'pending',
-          created_at: new Date().toISOString()
-        });
+        .insert(requestData);
         
       if (dbError) {
         console.error('خطأ في حفظ بيانات الطلب:', dbError);
@@ -105,8 +108,8 @@ const MaintenancePage: React.FC = () => {
       }
       
       // إضافة المرفقات إلى جدول المرفقات إذا وجدت
-      if (filePaths.length > 0) {
-        const attachmentsData = fileUrls.map((url, index) => ({
+      if (fileUrls.length > 0) {
+        const attachmentsData: AttachmentDB[] = fileUrls.map((url, index) => ({
           request_id: reqNumber,
           file_url: url,
           description: `مرفق للطلب رقم ${reqNumber}`,
