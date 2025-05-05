@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -90,16 +89,14 @@ const MaintenancePage: React.FC = () => {
       const { error: dbError } = await supabase
         .from('maintenance_requests')
         .insert({
-          request_number: reqNumber,
-          branch: formData.branch,
-          service_type: formData.serviceType,
           title: formData.title,
+          service_type: formData.serviceType,
           description: formData.description,
           priority: formData.priority,
           scheduled_date: formData.requestedDate,
           estimated_cost: formData.estimatedCost || null,
           status: 'pending',
-          created_at: new Date()
+          created_at: new Date().toISOString()
         });
         
       if (dbError) {
@@ -109,11 +106,11 @@ const MaintenancePage: React.FC = () => {
       
       // إضافة المرفقات إلى جدول المرفقات إذا وجدت
       if (filePaths.length > 0) {
-        const attachmentsData = filePaths.map((path, index) => ({
+        const attachmentsData = fileUrls.map((url, index) => ({
           request_id: reqNumber,
-          file_url: fileUrls[index],
+          file_url: url,
           description: `مرفق للطلب رقم ${reqNumber}`,
-          uploaded_at: new Date()
+          uploaded_at: new Date().toISOString()
         }));
         
         const { error: attachError } = await supabase

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import Header from "../components/Header";
@@ -8,29 +7,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-
-interface MaintenanceRequestDetails {
-  id: string;
-  request_number: string;
-  title: string;
-  description: string;
-  branch: string;
-  service_type: string;
-  priority: string;
-  status: string;
-  scheduled_date: string;
-  estimated_cost: string | null;
-  actual_cost: string | null;
-  created_at: string;
-  completion_date: string | null;
-}
-
-interface AttachmentDetails {
-  id: string;
-  file_url: string;
-  description: string | null;
-  uploaded_at: string;
-}
+import { MaintenanceRequestDetails, AttachmentDetails } from '@/types/maintenance';
 
 const getStatusColor = (status: string) => {
   switch (status?.toLowerCase()) {
@@ -88,14 +65,31 @@ const MaintenanceTracking: React.FC = () => {
       const { data: requestData, error: requestError } = await supabase
         .from('maintenance_requests')
         .select('*')
-        .eq('request_number', requestNumber)
+        .eq('id', requestNumber)
         .single();
       
       if (requestError) {
         throw new Error('لم يتم العثور على الطلب');
       }
       
-      setRequestDetails(requestData as MaintenanceRequestDetails);
+      // تحويل البيانات من قاعدة البيانات إلى نوع البيانات المطلوب
+      const details: MaintenanceRequestDetails = {
+        id: requestData.id,
+        request_number: requestNumber, // إضافة الرقم المستخدم في البحث
+        title: requestData.title,
+        description: requestData.description,
+        branch: "غير محدد", // إضافة قيمة افتراضية للفرع
+        service_type: requestData.service_type,
+        priority: requestData.priority,
+        status: requestData.status,
+        scheduled_date: requestData.scheduled_date,
+        estimated_cost: requestData.estimated_cost,
+        actual_cost: requestData.actual_cost,
+        created_at: requestData.created_at,
+        completion_date: requestData.completion_date
+      };
+      
+      setRequestDetails(details);
       
       // جلب المرفقات إن وجدت
       const { data: attachmentsData, error: attachmentsError } = await supabase
@@ -261,7 +255,7 @@ const MaintenanceTracking: React.FC = () => {
                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-construction-primary">
                                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path>
                                 <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                                <line x1="12" y1="15" x2="12.01" y2="16"></line>
                               </svg>
                               <div className="overflow-hidden">
                                 <p className="text-sm font-medium truncate">{attachment.description || 'مرفق'}</p>
