@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom colors for our construction theme
+				construction: {
+					primary: '#143C66',    // Dark navy blue
+					secondary: '#4A8DB7',  // Light blue
+					accent: '#F5A623',     // Gold/Yellow accent
+					light: '#F9FAFC',      // Light background
+					dark: '#0F2847',       // Darker navy
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +93,34 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					from: {
+						opacity: '0',
+					},
+					to: {
+						opacity: '1',
+					},
+				},
+				'slide-up': {
+					from: {
+						transform: 'translateY(20px)',
+						opacity: '0',
+					},
+					to: {
+						transform: 'translateY(0)',
+						opacity: '1',
+					},
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out forwards',
+				'slide-up': 'slide-up 0.7s ease-out forwards',
+			},
+			fontFamily: {
+				sans: ['Cairo', 'sans-serif'],
 			}
 		}
 	},
