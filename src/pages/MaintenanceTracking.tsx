@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useSearchParams, Link } from 'react-router-dom';
 import Header from "../components/Header";
@@ -62,10 +61,10 @@ const MaintenanceTracking: React.FC = () => {
   const fetchRequestDetails = async () => {
     setIsLoading(true);
     try {
-      // جلب تفاصيل الطلب
+      // 先尝试简单查询，不使用join
       const { data: requestData, error: requestError } = await supabase
         .from('maintenance_requests')
-        .select('*, stores(name)')
+        .select('*')
         .eq('id', requestNumber)
         .single();
       
@@ -73,13 +72,27 @@ const MaintenanceTracking: React.FC = () => {
         throw new Error('لم يتم العثور على الطلب');
       }
       
-      // تحويل البيانات من قاعدة البيانات إلى نوع البيانات المطلوب
+      // 分别查询商店信息
+      let branchName = "غير محدد";
+      if (requestData.store_id) {
+        const { data: storeData } = await supabase
+          .from('stores')
+          .select('name')
+          .eq('id', requestData.store_id)
+          .single();
+          
+        if (storeData) {
+          branchName = storeData.name;
+        }
+      }
+      
+      // 转换数据
       const details: MaintenanceRequestDetails = {
         id: requestData.id,
         request_number: requestNumber,
         title: requestData.title,
         description: requestData.description,
-        branch: requestData.stores?.name || "غير محدد",
+        branch: branchName,
         service_type: requestData.service_type,
         priority: requestData.priority,
         status: requestData.status,
@@ -92,7 +105,7 @@ const MaintenanceTracking: React.FC = () => {
       
       setRequestDetails(details);
       
-      // جلب المرفقات إن وجدت
+      // 获取附件
       const { data: attachmentsData, error: attachmentsError } = await supabase
         .from('attachments')
         .select('*')
@@ -103,7 +116,7 @@ const MaintenanceTracking: React.FC = () => {
         setAttachments(attachmentsData as AttachmentDetails[]);
       }
 
-      // إظهار رسالة نجاح
+      // 显示成功消息
       toast({
         title: "تم جلب البيانات بنجاح",
         description: `تم العثور على طلب الصيانة برقم ${requestNumber}`,

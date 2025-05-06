@@ -9,9 +9,10 @@ interface ReviewStepProps {
   formData: MaintenanceRequest;
   nextStep: () => void;
   prevStep: () => void;
+  isSubmitting?: boolean; // Added this property
 }
 
-const ReviewStep: React.FC<ReviewStepProps> = ({ formData, nextStep, prevStep }) => {
+const ReviewStep: React.FC<ReviewStepProps> = ({ formData, nextStep, prevStep, isSubmitting = false }) => {
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), 'PPP', { locale: ar });
@@ -122,12 +123,25 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData, nextStep, prevStep })
         <Button
           onClick={nextStep}
           className="bg-construction-primary text-white flex items-center"
+          disabled={isSubmitting}
         >
-          إرسال الطلب
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
-            <path d="M22 2L11 13"></path>
-            <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
-          </svg>
+          {isSubmitting ? (
+            <>
+              <span className="ml-2">جاري الإرسال...</span>
+              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+            </>
+          ) : (
+            <>
+              إرسال الطلب
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
+                <path d="M22 2L11 13"></path>
+                <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+              </svg>
+            </>
+          )}
         </Button>
       </div>
     </div>
