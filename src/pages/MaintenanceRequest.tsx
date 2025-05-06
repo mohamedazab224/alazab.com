@@ -6,6 +6,7 @@ import { toast } from "@/components/ui/use-toast";
 import { MaintenanceStep, MaintenanceRequest, MaintenanceRequestDB, AttachmentDB } from '@/types/maintenance';
 import { sendEmail } from '@/lib/emailjs';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 import StepIndicator from '@/components/maintenance/StepIndicator';
 import BasicInfoStep from '@/components/maintenance/BasicInfoStep';
@@ -15,6 +16,7 @@ import ReviewStep from '@/components/maintenance/ReviewStep';
 import SubmissionStep from '@/components/maintenance/SubmissionStep';
 
 const MaintenancePage: React.FC = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<MaintenanceStep>(MaintenanceStep.BASIC_INFO);
   const [formData, setFormData] = useState<MaintenanceRequest>({
     branch: '',
@@ -62,9 +64,51 @@ const MaintenancePage: React.FC = () => {
       const reqNumber = `MR-${uniqueId}`;
       setRequestNumber(reqNumber);
 
+      // بحث عن معرّف الفرع المحدد
+      const { data: storeData, error: storeError } = await supabase
+        .from('stores')
+        .select('id')
+        .eq('name', formData.branch)
+        .single();
+
+      let storeId = null;
+      if (!storeError && storeData) {
+        storeId = storeData.id;
+      }
+
+      // تحويل estimatedCost من نص إلى رقم إذا كان موجوداً
+      const estimatedCost = formData.estimatedCost
+        ? parseFloat(formData.estimatedCost)
+        : null;
+      
+      // حفظ المعلومات في قاعدة البيانات
+      const requestData: MaintenanceRequestDB = {
+        title: formData.title,
+        service_type: formData.serviceType,
+        description: formData.description,
+        priority: formData.priority,
+        scheduled_date: formData.requestedDate,
+        estimated_cost: estimatedCost,
+        status: 'pending',
+        store_id: storeId,
+        created_at: new Date().toISOString()
+      };
+        
+      const { data: insertedRequest, error: dbError } = await supabase
+        .from('maintenance_requests')
+        .insert(requestData)
+        .select();
+        
+      if (dbError) {
+        console.error('خطأ في حفظ بيانات الطلب:', dbError);
+        throw new Error('حدث خطأ في حفظ البيانات');
+      }
+      
+      const requestId = insertedRequest ? insertedRequest[0]?.id : reqNumber;
+      
       // رفع المرفقات إلى Supabase Storage (إذا وجدت)
       const uploadPromises = formData.attachments.map(async (file) => {
-        const fileName = `${reqNumber}-${file.name}`;
+        const fileName = `${requestId}-${file.name}`;
         const { data, error } = await supabase.storage
           .from('maintenance-attachments')
           .upload(fileName, file);
@@ -85,41 +129,11 @@ const MaintenancePage: React.FC = () => {
       const uploadedFiles = await Promise.all(uploadPromises);
       const fileUrls = uploadedFiles.filter(Boolean).map(file => file?.url);
       
-      // تحويل estimatedCost من نص إلى رقم إذا كان موجوداً
-      const estimatedCost = formData.estimatedCost
-        ? parseFloat(formData.estimatedCost)
-        : null;
-      
-      // حفظ المعلومات في قاعدة البيانات
-      const requestData: MaintenanceRequestDB = {
-        title: formData.title,
-        service_type: formData.serviceType,
-        description: formData.description,
-        priority: formData.priority,
-        scheduled_date: formData.requestedDate,
-        estimated_cost: estimatedCost,
-        status: 'pending',
-        store_id: null, // سيتم تحديثه لاحقاً حسب الفرع
-        created_at: new Date().toISOString()
-      };
-        
-      const { data: insertedRequest, error: dbError } = await supabase
-        .from('maintenance_requests')
-        .insert(requestData)
-        .select();
-        
-      if (dbError) {
-        console.error('خطأ في حفظ بيانات الطلب:', dbError);
-        throw new Error('حدث خطأ في حفظ البيانات');
-      }
-      
-      const requestId = insertedRequest ? insertedRequest[0]?.id : reqNumber;
-      
       // إضافة المرفقات إلى جدول المرفقات إذا وجدت
       if (fileUrls.length > 0) {
         const attachmentsData: AttachmentDB[] = fileUrls.map((url) => ({
           request_id: requestId,
-          file_url: url,
+          file_url: url || '',
           description: `مرفق للطلب ${formData.title}`,
           uploaded_at: new Date().toISOString()
         }));
@@ -135,7 +149,7 @@ const MaintenancePage: React.FC = () => {
       
       // إرسال البريد الإلكتروني
       const emailParams = {
-        request_number: reqNumber,
+        request_number: requestId,
         branch: formData.branch,
         service_type: formData.serviceType,
         title: formData.title,
@@ -146,14 +160,21 @@ const MaintenancePage: React.FC = () => {
         attachments_count: formData.attachments.length
       };
       
-      await sendEmail(emailParams);
+      try {
+        await sendEmail(emailParams);
+      } catch (emailError) {
+        console.error('خطأ في إرسال البريد الإلكتروني:', emailError);
+        // لن نوقف العملية إذا فشل إرسال البريد الإلكتروني
+      }
+      
       toast({
         title: "تم إرسال الطلب بنجاح",
-        description: `تم إنشاء طلب الصيانة برقم ${reqNumber}`,
+        description: `تم إنشاء طلب الصيانة برقم ${requestId}`,
         variant: "default",
       });
       
       // انتقال إلى خطوة التأكيد
+      setRequestNumber(requestId);
       nextStep();
     } catch (error) {
       console.error('خطأ في إرسال الطلب:', error);
@@ -164,6 +185,12 @@ const MaintenancePage: React.FC = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleTrackRequest = () => {
+    if (requestNumber) {
+      navigate(`/maintenance-tracking?requestNumber=${requestNumber}`);
     }
   };
 
@@ -201,11 +228,15 @@ const MaintenancePage: React.FC = () => {
             formData={formData}
             nextStep={isSubmitting ? () => {} : handleSubmit}
             prevStep={prevStep}
+            isSubmitting={isSubmitting}
           />
         );
       case MaintenanceStep.SUBMISSION:
         return (
-          <SubmissionStep requestNumber={requestNumber} />
+          <SubmissionStep 
+            requestNumber={requestNumber}
+            onTrackRequest={handleTrackRequest}
+          />
         );
       default:
         return null;
@@ -221,10 +252,7 @@ const MaintenancePage: React.FC = () => {
             <div className="text-center mb-8">
               <div className="flex justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-construction-primary">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M16 16s-1.5-2-4-2-4 2-4 2"></path>
-                  <line x1="9" y1="9" x2="9.01" y2="9"></line>
-                  <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                 </svg>
               </div>
               <h1 className="text-3xl font-bold text-gray-900">نظام طلبات الصيانة</h1>

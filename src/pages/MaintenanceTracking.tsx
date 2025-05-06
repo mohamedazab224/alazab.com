@@ -65,26 +65,12 @@ const MaintenanceTracking: React.FC = () => {
       // جلب تفاصيل الطلب
       const { data: requestData, error: requestError } = await supabase
         .from('maintenance_requests')
-        .select('*')
+        .select('*, stores(name)')
         .eq('id', requestNumber)
         .single();
       
       if (requestError) {
         throw new Error('لم يتم العثور على الطلب');
-      }
-      
-      // جلب اسم الفرع إذا كان هناك رقم فرع
-      let branchName = "غير محدد";
-      if (requestData.store_id) {
-        const { data: storeData } = await supabase
-          .from('stores')
-          .select('name')
-          .eq('id', requestData.store_id)
-          .single();
-          
-        if (storeData) {
-          branchName = storeData.name;
-        }
       }
       
       // تحويل البيانات من قاعدة البيانات إلى نوع البيانات المطلوب
@@ -93,7 +79,7 @@ const MaintenanceTracking: React.FC = () => {
         request_number: requestNumber,
         title: requestData.title,
         description: requestData.description,
-        branch: branchName,
+        branch: requestData.stores?.name || "غير محدد",
         service_type: requestData.service_type,
         priority: requestData.priority,
         status: requestData.status,
@@ -110,11 +96,19 @@ const MaintenanceTracking: React.FC = () => {
       const { data: attachmentsData, error: attachmentsError } = await supabase
         .from('attachments')
         .select('*')
-        .eq('request_id', requestNumber);
+        .eq('request_id', requestNumber)
+        .eq('is_deleted', false);
       
       if (!attachmentsError && attachmentsData) {
         setAttachments(attachmentsData as AttachmentDetails[]);
       }
+
+      // إظهار رسالة نجاح
+      toast({
+        title: "تم جلب البيانات بنجاح",
+        description: `تم العثور على طلب الصيانة برقم ${requestNumber}`,
+        variant: "default"
+      });
     } catch (error) {
       console.error('خطأ في جلب بيانات الطلب:', error);
       toast({

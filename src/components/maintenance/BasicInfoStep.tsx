@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { toast } from "@/components/ui/use-toast";
 
 interface BasicInfoStepProps {
   formData: MaintenanceRequest;
@@ -42,8 +43,20 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ formData, updateFormData,
         
         setBranches(storesData || []);
         setServiceTypes(servicesData || []);
+
+        // عرض رسالة نجاح
+        toast({
+          title: "تم تحميل البيانات",
+          description: "تم جلب بيانات الفروع وأنواع الخدمات بنجاح",
+          variant: "default",
+        });
       } catch (error) {
         console.error('خطأ في جلب البيانات:', error);
+        toast({
+          title: "خطأ في تحميل البيانات",
+          description: "سيتم استخدام البيانات الافتراضية",
+          variant: "destructive",
+        });
         // في حالة حدوث خطأ، استخدام البيانات الافتراضية
         setBranches([
           { id: "1", name: "الرياض" },
