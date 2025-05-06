@@ -1,10 +1,12 @@
 
-import React from 'react';
-import { MaintenanceRequest } from '@/types/maintenance';
+import React, { useEffect, useState } from 'react';
+import { MaintenanceRequest, BranchData, ServiceTypeData } from '@/types/maintenance';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2 } from 'lucide-react';
 
 interface BasicInfoStepProps {
   formData: MaintenanceRequest;
@@ -12,28 +14,74 @@ interface BasicInfoStepProps {
   nextStep: () => void;
 }
 
-const branches = [
-  "الرياض",
-  "جدة",
-  "مكة",
-  "المدينة",
-  "الدمام",
-  "الخبر"
-];
-
-const serviceTypes = [
-  "صيانة عامة",
-  "صيانة كهربائية",
-  "صيانة سباكة",
-  "صيانة تكييف",
-  "صيانة أجهزة",
-  "أخرى"
-];
-
 const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ formData, updateFormData, nextStep }) => {
+  const [branches, setBranches] = useState<BranchData[]>([]);
+  const [serviceTypes, setServiceTypes] = useState<ServiceTypeData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // جلب بيانات الفروع
+        const { data: storesData, error: storesError } = await supabase
+          .from('stores')
+          .select('id, name')
+          .eq('is_deleted', false);
+        
+        if (storesError) throw storesError;
+        
+        // جلب أنواع خدمات الصيانة
+        const { data: servicesData, error: servicesError } = await supabase
+          .from('maintenance_services')
+          .select('id, name, description')
+          .eq('is_active', true)
+          .eq('is_deleted', false);
+        
+        if (servicesError) throw servicesError;
+        
+        setBranches(storesData || []);
+        setServiceTypes(servicesData || []);
+      } catch (error) {
+        console.error('خطأ في جلب البيانات:', error);
+        // في حالة حدوث خطأ، استخدام البيانات الافتراضية
+        setBranches([
+          { id: "1", name: "الرياض" },
+          { id: "2", name: "جدة" },
+          { id: "3", name: "مكة" },
+          { id: "4", name: "المدينة" },
+          { id: "5", name: "الدمام" },
+          { id: "6", name: "الخبر" }
+        ]);
+        
+        setServiceTypes([
+          { id: "1", name: "صيانة عامة" },
+          { id: "2", name: "صيانة كهربائية" },
+          { id: "3", name: "صيانة سباكة" },
+          { id: "4", name: "صيانة تكييف" },
+          { id: "5", name: "صيانة أجهزة" },
+          { id: "6", name: "أخرى" }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
   const isFormValid = () => {
     return formData.branch && formData.serviceType && formData.title;
   };
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-60">
+        <Loader2 className="h-8 w-8 animate-spin text-construction-primary" />
+        <span className="mr-2">جاري تحميل البيانات...</span>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-6">
@@ -55,8 +103,8 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ formData, updateFormData,
             </SelectTrigger>
             <SelectContent>
               {branches.map((branch) => (
-                <SelectItem key={branch} value={branch}>
-                  {branch}
+                <SelectItem key={branch.id} value={branch.name}>
+                  {branch.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -76,8 +124,8 @@ const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ formData, updateFormData,
             </SelectTrigger>
             <SelectContent>
               {serviceTypes.map((service) => (
-                <SelectItem key={service} value={service}>
-                  {service}
+                <SelectItem key={service.id} value={service.name}>
+                  {service.name}
                 </SelectItem>
               ))}
             </SelectContent>

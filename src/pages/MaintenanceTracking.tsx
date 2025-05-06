@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams, Link } from 'react-router-dom';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { supabase } from '@/integrations/supabase/client';
@@ -72,13 +73,27 @@ const MaintenanceTracking: React.FC = () => {
         throw new Error('لم يتم العثور على الطلب');
       }
       
+      // جلب اسم الفرع إذا كان هناك رقم فرع
+      let branchName = "غير محدد";
+      if (requestData.store_id) {
+        const { data: storeData } = await supabase
+          .from('stores')
+          .select('name')
+          .eq('id', requestData.store_id)
+          .single();
+          
+        if (storeData) {
+          branchName = storeData.name;
+        }
+      }
+      
       // تحويل البيانات من قاعدة البيانات إلى نوع البيانات المطلوب
       const details: MaintenanceRequestDetails = {
         id: requestData.id,
         request_number: requestNumber,
         title: requestData.title,
         description: requestData.description,
-        branch: "غير محدد",
+        branch: branchName,
         service_type: requestData.service_type,
         priority: requestData.priority,
         status: requestData.status,
@@ -104,7 +119,7 @@ const MaintenanceTracking: React.FC = () => {
       console.error('خطأ في جلب بيانات الطلب:', error);
       toast({
         title: "تعذر العثور على الطلب",
-        description: "الرجاء التأكد من رقم الطلب وال��حاولة مرة أخرى",
+        description: "الرجاء التأكد من رقم الطلب والمحاولة مرة أخرى",
         variant: "destructive"
       });
       setRequestDetails(null);
@@ -167,6 +182,13 @@ const MaintenanceTracking: React.FC = () => {
                     {isLoading ? 'جاري البحث...' : 'بحث'}
                   </Button>
                 </div>
+                <div className="mt-4">
+                  <Link to="/maintenance-list">
+                    <Button variant="outline" className="text-construction-primary">
+                      عرض جميع الطلبات
+                    </Button>
+                  </Link>
+                </div>
               </div>
               
               {isLoading && (
@@ -180,7 +202,7 @@ const MaintenanceTracking: React.FC = () => {
                   <div className="bg-gray-50 p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                       <p className="text-sm text-gray-500">رقم الطلب</p>
-                      <p className="font-bold">{requestDetails.request_number}</p>
+                      <p className="font-bold">{requestDetails.id}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">تاريخ الإنشاء</p>

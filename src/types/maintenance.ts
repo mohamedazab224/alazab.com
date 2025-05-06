@@ -53,6 +53,17 @@ export interface AttachmentDetails {
   uploaded_at: string;
 }
 
+export interface BranchData {
+  id: string;
+  name: string;
+}
+
+export interface ServiceTypeData {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 // Database interface for maintenance_requests table
 export interface MaintenanceRequestDB {
   id?: string;
@@ -83,4 +94,14 @@ export interface AttachmentDB {
   uploaded_at: string;
   uploaded_by?: string | null;
   is_deleted?: boolean;
+}
+
+export interface MaintenanceRequestSummary {
+  id: string;
+  title: string;
+  service_type: string;
+  status: string;
+  priority: string;
+  scheduled_date: string;
+  created_at: string;
 }

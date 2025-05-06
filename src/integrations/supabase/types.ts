@@ -71,20 +71,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "attachments_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "attachments_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests_summary"
-            referencedColumns: ["request_id"]
-          },
-          {
             foreignKeyName: "attachments_uploaded_by_fkey"
             columns: ["uploaded_by"]
             isOneToOne: false
@@ -143,20 +129,6 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "comments_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "comments_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests_summary"
-            referencedColumns: ["request_id"]
-          },
           {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
@@ -264,20 +236,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "history_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "history_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests_summary"
-            referencedColumns: ["request_id"]
-          },
-          {
             foreignKeyName: "history_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -325,26 +283,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "invoices_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoices_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests_summary"
-            referencedColumns: ["request_id"]
-          },
         ]
       }
       maintenance_requests: {
         Row: {
           actual_cost: number | null
           assigned_to: string | null
+          attachments: string[] | null
           completion_date: string | null
           created_at: string | null
           created_by: string | null
@@ -355,6 +300,9 @@ export type Database = {
           is_deleted: boolean | null
           primary_service_id: string | null
           priority: string | null
+          requester_email: string | null
+          requester_name: string | null
+          requester_phone: string | null
           scheduled_date: string | null
           service_type: string | null
           status: string | null
@@ -366,6 +314,7 @@ export type Database = {
         Insert: {
           actual_cost?: number | null
           assigned_to?: string | null
+          attachments?: string[] | null
           completion_date?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -376,6 +325,9 @@ export type Database = {
           is_deleted?: boolean | null
           primary_service_id?: string | null
           priority?: string | null
+          requester_email?: string | null
+          requester_name?: string | null
+          requester_phone?: string | null
           scheduled_date?: string | null
           service_type?: string | null
           status?: string | null
@@ -387,6 +339,7 @@ export type Database = {
         Update: {
           actual_cost?: number | null
           assigned_to?: string | null
+          attachments?: string[] | null
           completion_date?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -397,6 +350,9 @@ export type Database = {
           is_deleted?: boolean | null
           primary_service_id?: string | null
           priority?: string | null
+          requester_email?: string | null
+          requester_name?: string | null
+          requester_phone?: string | null
           scheduled_date?: string | null
           service_type?: string | null
           status?: string | null
@@ -405,36 +361,7 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "maintenance_requests_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "maintenance_requests_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "maintenance_requests_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "maintenance_requests_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       maintenance_requests_archive: {
         Row: {
@@ -659,20 +586,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "maintenance_works_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "maintenance_works_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests_summary"
-            referencedColumns: ["request_id"]
-          },
-          {
             foreignKeyName: "maintenance_works_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
@@ -894,20 +807,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ratings_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ratings_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests_summary"
-            referencedColumns: ["request_id"]
-          },
-          {
             foreignKeyName: "ratings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -995,20 +894,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "request_status_log_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "request_status_log_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests_summary"
-            referencedColumns: ["request_id"]
           },
         ]
       }
@@ -1178,47 +1063,11 @@ export type Database = {
           status?: string | null
           step_name?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "workflow_steps_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "workflow_steps_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_requests_summary"
-            referencedColumns: ["request_id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
-      maintenance_3year_report: {
-        Row: {
-          month: string | null
-          request_count: number | null
-          total_actual_cost: number | null
-          total_estimated_cost: number | null
-        }
-        Relationships: []
-      }
-      maintenance_requests_summary: {
-        Row: {
-          estimated_cost: number | null
-          priority: string | null
-          request_id: string | null
-          scheduled_date: string | null
-          service_name: string | null
-          status: string | null
-          store_name: string | null
-          title: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       create_profile: {

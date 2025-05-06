@@ -83,8 +83,12 @@ const MaintenancePage: React.FC = () => {
       });
       
       const uploadedFiles = await Promise.all(uploadPromises);
-      const filePaths = uploadedFiles.filter(Boolean).map(file => file?.path);
       const fileUrls = uploadedFiles.filter(Boolean).map(file => file?.url);
+      
+      // تحويل estimatedCost من نص إلى رقم إذا كان موجوداً
+      const estimatedCost = formData.estimatedCost
+        ? parseFloat(formData.estimatedCost)
+        : null;
       
       // حفظ المعلومات في قاعدة البيانات
       const requestData: MaintenanceRequestDB = {
@@ -93,8 +97,9 @@ const MaintenancePage: React.FC = () => {
         description: formData.description,
         priority: formData.priority,
         scheduled_date: formData.requestedDate,
-        estimated_cost: formData.estimatedCost ? parseFloat(formData.estimatedCost) : null,
+        estimated_cost: estimatedCost,
         status: 'pending',
+        store_id: null, // سيتم تحديثه لاحقاً حسب الفرع
         created_at: new Date().toISOString()
       };
         
@@ -112,10 +117,10 @@ const MaintenancePage: React.FC = () => {
       
       // إضافة المرفقات إلى جدول المرفقات إذا وجدت
       if (fileUrls.length > 0) {
-        const attachmentsData: AttachmentDB[] = fileUrls.map((url, index) => ({
+        const attachmentsData: AttachmentDB[] = fileUrls.map((url) => ({
           request_id: requestId,
           file_url: url,
-          description: `مرفق للطلب رقم ${reqNumber}`,
+          description: `مرفق للطلب ${formData.title}`,
           uploaded_at: new Date().toISOString()
         }));
         
