@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -19,15 +19,7 @@ const MaintenanceList: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
 
-  useEffect(() => {
-    fetchRequests();
-  }, []);
-
-  useEffect(() => {
-    filterRequests();
-  }, [searchTerm, statusFilter, priorityFilter, requests]);
-
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -50,7 +42,15 @@ const MaintenanceList: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
+  useEffect(() => {
+    filterRequests();
+  }, [searchTerm, statusFilter, priorityFilter, requests]);
 
   const filterRequests = () => {
     let filtered = [...requests];
@@ -74,6 +74,14 @@ const MaintenanceList: React.FC = () => {
     }
 
     setFilteredRequests(filtered);
+  };
+
+  const handleStatusChange = (requestId: string, newStatus: string) => {
+    // تحديث الحالة في القائمة المحلية
+    const updatedRequests = requests.map(req => 
+      req.id === requestId ? {...req, status: newStatus} : req
+    );
+    setRequests(updatedRequests);
   };
 
   const clearFilters = () => {
@@ -160,6 +168,8 @@ const MaintenanceList: React.FC = () => {
               <MaintenanceRequestsList 
                 requests={filteredRequests} 
                 isLoading={isLoading} 
+                onStatusChange={handleStatusChange}
+                refreshRequests={fetchRequests}
               />
             </div>
           </div>

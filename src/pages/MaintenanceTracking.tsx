@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useSearchParams, Link } from 'react-router-dom';
 import Header from "../components/Header";
@@ -7,6 +8,13 @@ import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { MaintenanceRequestDetails, AttachmentDetails } from '@/types/maintenance';
 
 const getStatusColor = (status: string) => {
@@ -51,6 +59,7 @@ const MaintenanceTracking: React.FC = () => {
   const [requestDetails, setRequestDetails] = useState<MaintenanceRequestDetails | null>(null);
   const [attachments, setAttachments] = useState<AttachmentDetails[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState<boolean>(false);
   
   useEffect(() => {
     if (requestNumber) {
@@ -151,6 +160,59 @@ const MaintenanceTracking: React.FC = () => {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'غير محدد';
     return new Date(dateString).toLocaleDateString('ar-SA');
+  };
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!requestDetails) return;
+    
+    setIsUpdatingStatus(true);
+    try {
+      const { error } = await supabase
+        .from('maintenance_requests')
+        .update({ status: newStatus })
+        .eq('id', requestDetails.id);
+      
+      if (error) throw error;
+      
+      // إذا تم تعيين الحالة كمكتمل، قم بتعيين تاريخ الاكتمال
+      if (newStatus === 'completed') {
+        await supabase
+          .from('maintenance_requests')
+          .update({ completion_date: new Date().toISOString() })
+          .eq('id', requestDetails.id);
+      }
+      
+      // إضافة سجل تغيير الحالة
+      await supabase
+        .from('request_status_log')
+        .insert({
+          request_id: requestDetails.id,
+          status: newStatus,
+          note: `تم تغيير الحالة إلى ${getStatusText(newStatus)}`,
+        });
+      
+      // تحديث البيانات المحلية
+      setRequestDetails({
+        ...requestDetails,
+        status: newStatus,
+        completion_date: newStatus === 'completed' ? new Date().toISOString() : requestDetails.completion_date
+      });
+      
+      toast({
+        title: "تم تحديث الحالة",
+        description: `تم تحديث حالة الطلب إلى ${getStatusText(newStatus)}`,
+      });
+      
+    } catch (error) {
+      console.error('خطأ في تحديث الحالة:', error);
+      toast({
+        title: "خطأ في تحديث الحالة",
+        description: "حدث خطأ أثناء محاولة تحديث حالة الطلب",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdatingStatus(false);
+    }
   };
   
   return (
@@ -264,6 +326,33 @@ const MaintenanceTracking: React.FC = () => {
                           <span>{formatDate(requestDetails.completion_date)}</span>
                         </li>
                       </ul>
+                    </div>
+                  </div>
+
+                  <Separator />
+                  
+                  <div>
+                    <h3 className="font-semibold mb-3">تحديث الحالة</h3>
+                    <div className="flex gap-4">
+                      <Select
+                        value={requestDetails.status}
+                        onValueChange={handleStatusChange}
+                        disabled={isUpdatingStatus}
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="تحديث الحالة" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">قيد الانتظار</SelectItem>
+                          <SelectItem value="in-progress">قيد التنفيذ</SelectItem>
+                          <SelectItem value="completed">مكتمل</SelectItem>
+                          <SelectItem value="cancelled">ملغي</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      {isUpdatingStatus && (
+                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-construction-primary self-center"></div>
+                      )}
                     </div>
                   </div>
                   

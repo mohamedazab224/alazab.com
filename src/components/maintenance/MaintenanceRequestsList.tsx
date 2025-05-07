@@ -1,13 +1,24 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MaintenanceRequestSummary } from '@/types/maintenance';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from "@/components/ui/use-toast";
 
 interface MaintenanceRequestsListProps {
   requests: MaintenanceRequestSummary[];
   isLoading: boolean;
+  onStatusChange?: (requestId: string, newStatus: string) => void;
+  refreshRequests?: () => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -47,11 +58,70 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ar-SA');
 };
 
-const MaintenanceRequestsList: React.FC<MaintenanceRequestsListProps> = ({ requests, isLoading }) => {
+const MaintenanceRequestsList: React.FC<MaintenanceRequestsListProps> = ({ 
+  requests, 
+  isLoading, 
+  onStatusChange, 
+  refreshRequests 
+}) => {
   const navigate = useNavigate();
+  const [updatingStatus, setUpdatingStatus] = useState<Record<string, boolean>>({});
 
   const viewRequestDetails = (requestId: string) => {
     navigate(`/maintenance-tracking?requestNumber=${requestId}`);
+  };
+
+  const handleStatusChange = async (requestId: string, newStatus: string) => {
+    setUpdatingStatus(prev => ({ ...prev, [requestId]: true }));
+    
+    try {
+      const { error } = await supabase
+        .from('maintenance_requests')
+        .update({ status: newStatus })
+        .eq('id', requestId);
+      
+      if (error) throw error;
+      
+      // إذا تم تعيين الحالة كمكتمل، قم بتعيين تاريخ الاكتمال
+      if (newStatus === 'completed') {
+        await supabase
+          .from('maintenance_requests')
+          .update({ completion_date: new Date().toISOString() })
+          .eq('id', requestId);
+      }
+      
+      // إضافة سجل تغيير الحالة
+      await supabase
+        .from('request_status_log')
+        .insert({
+          request_id: requestId,
+          status: newStatus,
+          note: `تم تغيير الحالة إلى ${getStatusText(newStatus)}`,
+        });
+      
+      toast({
+        title: "تم تحديث الحالة",
+        description: `تم تحديث حالة الطلب إلى ${getStatusText(newStatus)}`,
+      });
+      
+      if (onStatusChange) {
+        onStatusChange(requestId, newStatus);
+      }
+      
+      if (refreshRequests) {
+        refreshRequests();
+      }
+      
+    } catch (error) {
+      console.error('خطأ في تحديث الحالة:', error);
+      toast({
+        title: "خطأ في تحديث الحالة",
+        description: "حدث خطأ أثناء محاولة تحديث حالة الطلب",
+        variant: "destructive"
+      });
+    } finally {
+      setUpdatingStatus(prev => ({ ...prev, [requestId]: false }));
+    }
   };
 
   if (isLoading) {
@@ -89,7 +159,7 @@ const MaintenanceRequestsList: React.FC<MaintenanceRequestsListProps> = ({ reque
             <TableHead className="text-right">الأولوية</TableHead>
             <TableHead className="text-right">تاريخ الإنشاء</TableHead>
             <TableHead className="text-right">تاريخ الجدولة</TableHead>
-            <TableHead></TableHead>
+            <TableHead className="text-right">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -98,21 +168,46 @@ const MaintenanceRequestsList: React.FC<MaintenanceRequestsListProps> = ({ reque
               <TableCell className="font-medium">{request.title}</TableCell>
               <TableCell>{request.service_type}</TableCell>
               <TableCell>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(request.status)}`}>
-                  {getStatusText(request.status)}
-                </span>
+                {updatingStatus[request.id] ? (
+                  <div className="animate-pulse flex space-x-4">
+                    <div className="h-6 w-24 bg-gray-200 rounded"></div>
+                  </div>
+                ) : (
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(request.status)}`}>
+                    {getStatusText(request.status)}
+                  </span>
+                )}
               </TableCell>
               <TableCell>{request.priority}</TableCell>
               <TableCell>{formatDate(request.created_at)}</TableCell>
               <TableCell>{formatDate(request.scheduled_date)}</TableCell>
-              <TableCell>
-                <Button
-                  variant="outline"
-                  onClick={() => viewRequestDetails(request.id)}
-                  className="text-construction-primary hover:text-white hover:bg-construction-primary"
-                >
-                  عرض
-                </Button>
+              <TableCell className="space-y-2">
+                <div className="flex flex-wrap gap-2 items-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => viewRequestDetails(request.id)}
+                    className="text-construction-primary hover:text-white hover:bg-construction-primary"
+                    size="sm"
+                  >
+                    عرض
+                  </Button>
+                  
+                  <Select
+                    value={request.status}
+                    onValueChange={(value) => handleStatusChange(request.id, value)}
+                    disabled={updatingStatus[request.id]}
+                  >
+                    <SelectTrigger className="w-[140px] h-9 text-xs">
+                      <SelectValue placeholder="تغيير الحالة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">قيد الانتظار</SelectItem>
+                      <SelectItem value="in-progress">قيد التنفيذ</SelectItem>
+                      <SelectItem value="completed">مكتمل</SelectItem>
+                      <SelectItem value="cancelled">ملغي</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </TableCell>
             </TableRow>
           ))}
