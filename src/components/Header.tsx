@@ -6,10 +6,17 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Menu } from "lucide-react";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isMobile = useIsMobile();
   
   useEffect(() => {
@@ -26,10 +33,6 @@ const Header: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-  
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
 
   const navigationLinks = [
     { title: "الرئيسية", path: "/" },
@@ -53,7 +56,6 @@ const Header: React.FC = () => {
             key={link.path}
             to={link.path} 
             className="text-construction-primary font-medium hover:text-construction-accent transition p-3 border-b"
-            onClick={() => isMobile && setMobileMenuOpen(false)}
           >
             {link.title}
           </Link>
@@ -95,30 +97,40 @@ const Header: React.FC = () => {
           </Link>
         </nav>
         
-        <Button className="hidden md:block bg-construction-accent hover:bg-construction-accent/90 text-white">
-          احصل على استشارة
-        </Button>
+        <div className="hidden md:flex">
+          <Button className="bg-construction-accent hover:bg-construction-accent/90 text-white">
+            احصل على استشارة
+          </Button>
+        </div>
         
-        {/* Sidebar Trigger Button */}
+        {/* Mobile Menu Button - Made More Prominent */}
         {isMobile ? (
           <Drawer>
             <DrawerTrigger asChild>
-              <button className="md:hidden text-construction-primary p-2">
-                <Menu size={24} />
-              </button>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="md:hidden border-2 border-construction-accent"
+                aria-label="فتح القائمة"
+              >
+                <Menu size={24} className="text-construction-accent" />
+              </Button>
             </DrawerTrigger>
-            <DrawerContent className="h-[80vh]">
+            <DrawerContent className="h-[85vh]">
               <SidebarContent />
             </DrawerContent>
           </Drawer>
         ) : (
           <Sheet>
             <SheetTrigger asChild>
-              <button 
-                className="md:hidden text-construction-primary p-2"
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="md:hidden border-2 border-construction-accent"
+                aria-label="فتح القائمة"
               >
-                <Menu size={24} />
-              </button>
+                <Menu size={24} className="text-construction-accent" />
+              </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] sm:w-[350px]">
               <SidebarContent />
@@ -126,32 +138,6 @@ const Header: React.FC = () => {
           </Sheet>
         )}
       </div>
-      
-      {/* Mobile Menu (Legacy) */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg">
-          <div className="container mx-auto py-4 px-4 flex flex-col gap-4">
-            <Link to="/" className="text-construction-primary font-medium hover:text-construction-accent transition py-2 border-b">
-              الرئيسية
-            </Link>
-            <Link to="/services" className="text-construction-primary font-medium hover:text-construction-accent transition py-2 border-b">
-              خدماتنا
-            </Link>
-            <Link to="/projects" className="text-construction-primary font-medium hover:text-construction-accent transition py-2 border-b">
-              المشاريع
-            </Link>
-            <Link to="/about" className="text-construction-primary font-medium hover:text-construction-accent transition py-2 border-b">
-              من نحن
-            </Link>
-            <Link to="/contact" className="text-construction-primary font-medium hover:text-construction-accent transition py-2">
-              اتصل بنا
-            </Link>
-            <Button className="bg-construction-accent hover:bg-construction-accent/90 text-white w-full mt-2">
-              احصل على استشارة
-            </Button>
-          </div>
-        </div>
-      )}
     </header>
   );
 };
