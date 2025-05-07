@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
@@ -45,19 +46,19 @@ const Footer: React.FC = () => {
             <h3 className="text-xl font-bold mb-4">روابط سريعة</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition">الرئيسية</a>
+                <Link to="/" className="text-gray-300 hover:text-white transition">الرئيسية</Link>
               </li>
               <li>
-                <a href="#services" className="text-gray-300 hover:text-white transition">خدماتنا</a>
+                <Link to="/services" className="text-gray-300 hover:text-white transition">خدماتنا</Link>
               </li>
               <li>
-                <a href="#projects" className="text-gray-300 hover:text-white transition">المشاريع</a>
+                <Link to="/projects" className="text-gray-300 hover:text-white transition">المشاريع</Link>
               </li>
               <li>
-                <a href="#about" className="text-gray-300 hover:text-white transition">من نحن</a>
+                <Link to="/about" className="text-gray-300 hover:text-white transition">من نحن</Link>
               </li>
               <li>
-                <a href="#contact" className="text-gray-300 hover:text-white transition">اتصل بنا</a>
+                <Link to="/contact" className="text-gray-300 hover:text-white transition">اتصل بنا</Link>
               </li>
             </ul>
           </div>
@@ -67,19 +68,19 @@ const Footer: React.FC = () => {
             <h3 className="text-xl font-bold mb-4">خدماتنا</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition">مقاولات عامة</a>
+                <Link to="/services" className="text-gray-300 hover:text-white transition">مقاولات عامة</Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition">تصميم معماري</a>
+                <Link to="/services" className="text-gray-300 hover:text-white transition">تصميم معماري</Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition">صيانة وترميم</a>
+                <Link to="/services" className="text-gray-300 hover:text-white transition">صيانة وترميم</Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition">استشارات هندسية</a>
+                <Link to="/services" className="text-gray-300 hover:text-white transition">استشارات هندسية</Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition">تشطيبات داخلية</a>
+                <Link to="/services" className="text-gray-300 hover:text-white transition">تشطيبات داخلية</Link>
               </li>
             </ul>
           </div>
