@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Menu } from "lucide-react";
+import { Menu, PanelLeft } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -14,10 +14,22 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -61,11 +73,6 @@ const Header: React.FC = () => {
           </Link>
         ))}
       </div>
-      <div className="mt-auto pt-6">
-        <Button className="w-full bg-construction-accent hover:bg-construction-accent/90 text-white">
-          احصل على استشارة
-        </Button>
-      </div>
     </div>
   );
 
@@ -97,9 +104,16 @@ const Header: React.FC = () => {
           </Link>
         </nav>
         
-        <div className="hidden md:flex">
-          <Button className="bg-construction-accent hover:bg-construction-accent/90 text-white">
-            احصل على استشارة
+        {/* Sidebar Trigger Button (replacing consultation button) */}
+        <div className="hidden md:block">
+          <Button 
+            variant="outline"
+            size="icon"
+            className="border-2 border-construction-accent"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="فتح القائمة الجانبية"
+          >
+            <PanelLeft size={24} className="text-construction-accent" />
           </Button>
         </div>
         
@@ -121,7 +135,7 @@ const Header: React.FC = () => {
             </DrawerContent>
           </Drawer>
         ) : (
-          <Sheet>
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetTrigger asChild>
               <Button 
                 variant="outline" 
@@ -138,6 +152,13 @@ const Header: React.FC = () => {
           </Sheet>
         )}
       </div>
+      
+      {/* Sidebar for desktop */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+          <SidebarContent />
+        </SheetContent>
+      </Sheet>
     </header>
   );
 };
