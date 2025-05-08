@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { MaintenanceStep, MaintenanceRequest, MaintenanceRequestDB, AttachmentDB } from '@/types/maintenance';
 import { sendEmail } from '@/lib/emailjs';
@@ -14,6 +17,7 @@ import DetailsStep from '@/components/maintenance/DetailsStep';
 import AttachmentsStep from '@/components/maintenance/AttachmentsStep';
 import ReviewStep from '@/components/maintenance/ReviewStep';
 import SubmissionStep from '@/components/maintenance/SubmissionStep';
+import QuickRequestForm from '@/components/maintenance/QuickRequestForm';
 
 const MaintenancePage: React.FC = () => {
   const navigate = useNavigate();
@@ -30,6 +34,7 @@ const MaintenancePage: React.FC = () => {
   });
   const [requestNumber, setRequestNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<string>("standard");
 
   const updateFormData = (key: string, value: string) => {
     setFormData({
@@ -256,16 +261,41 @@ const MaintenancePage: React.FC = () => {
                 </svg>
               </div>
               <h1 className="text-3xl font-bold text-gray-900">نظام طلبات الصيانة</h1>
-              <p className="text-gray-600 mt-2">أدخل بيانات طلب الصيانة الخاص بك بالخطوات</p>
+              <p className="text-gray-600 mt-2">أدخل بيانات طلب الصيانة الخاص بك</p>
             </div>
-            
-            {currentStep !== MaintenanceStep.SUBMISSION && (
-              <StepIndicator currentStep={currentStep} />
-            )}
-            
-            <div className="bg-white shadow-sm rounded-lg p-6">
-              {renderStep()}
-            </div>
+
+            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+              <div className="flex justify-center mb-6">
+                <TabsList className="grid w-full max-w-md grid-cols-2">
+                  <TabsTrigger value="standard">نموذج تفصيلي</TabsTrigger>
+                  <TabsTrigger value="quick">نموذج سريع</TabsTrigger>
+                </TabsList>
+              </div>
+              
+              <TabsContent value="standard">
+                {currentStep !== MaintenanceStep.SUBMISSION && (
+                  <StepIndicator currentStep={currentStep} />
+                )}
+                
+                <Card>
+                  <CardContent className="pt-6">
+                    {renderStep()}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="quick">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="mb-4">
+                      <h2 className="text-xl font-semibold text-center mb-2">نموذج الطلب السريع</h2>
+                      <p className="text-sm text-gray-500 text-center">استخدم هذا النموذج لإرسال طلب صيانة سريع بخطوة واحدة</p>
+                    </div>
+                    <QuickRequestForm />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </main>
