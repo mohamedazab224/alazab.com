@@ -55,6 +55,7 @@ const Header: React.FC = () => {
     { title: "طلب صيانة", path: "/maintenance-request" },
     { title: "متابعة الطلبات", path: "/maintenance-tracking" },
     { title: "قائمة طلبات الصيانة", path: "/maintenance-list" },
+    { title: "إدارة المشاريع", path: "/project-management" },
   ];
 
   const SidebarContent = () => (
