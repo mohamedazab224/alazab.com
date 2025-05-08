@@ -1,8 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash, Eye } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import ProjectForm from './ProjectForm';
@@ -140,6 +141,14 @@ const ProjectList: React.FC = () => {
                 <p className="text-gray-700 text-sm line-clamp-2">{project.description}</p>
               )}
               <div className="flex justify-end gap-2 mt-4">
+                <Link to={`/projects/${project.id}`}>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                  >
+                    <Eye size={16} className="ml-1" /> عرض
+                  </Button>
+                </Link>
                 <Button 
                   variant="outline" 
                   size="sm" 
