@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { Upload, File } from "lucide-react";
+import { Upload } from "lucide-react";
 
 interface ProjectFileUploadProps {
   projectId: string;
@@ -39,6 +39,16 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = `project_files/${projectId}/${fileName}`;
+        
+        // التحقق من وجود خزنة التخزين قبل التحميل
+        const { data: bucketData, error: bucketError } = await supabase.storage.getBucket('projects');
+        if (bucketError) {
+          // إنشاء الخزنة إذا لم تكن موجودة
+          await supabase.storage.createBucket('projects', {
+            public: true,
+            fileSizeLimit: 10485760 // 10 ميجابايت
+          });
+        }
         
         // تحميل الملف إلى Supabase Storage
         const { data: fileData, error: uploadError } = await supabase.storage
@@ -82,11 +92,11 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
       const fileInput = document.getElementById('file-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error uploading files:", error);
       toast({
         title: "خطأ في تحميل الملفات",
-        description: "حدث خطأ أثناء محاولة تحميل الملفات",
+        description: error.message || "حدث خطأ أثناء محاولة تحميل الملفات",
         variant: "destructive",
       });
     } finally {

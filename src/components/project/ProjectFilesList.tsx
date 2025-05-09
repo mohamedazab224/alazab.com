@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { File, ExternalLink } from "lucide-react";
+import { File, ExternalLink, Eye, Download, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogTrigger,
@@ -59,6 +59,7 @@ const ProjectFilesList: React.FC<ProjectFilesListProps> = ({
 
   // تحديد نوع الملف لإظهار المحتوى المناسب
   const getFileType = (file: ProjectFile) => {
+    if (!file.type) return 'other';
     const lowerType = file.type.toLowerCase();
     if (lowerType.includes('image')) return 'image';
     if (lowerType.includes('pdf')) return 'pdf';
@@ -115,7 +116,7 @@ const ProjectFilesList: React.FC<ProjectFilesListProps> = ({
               className="mt-4"
               onClick={() => window.open(file.file_url, '_blank')}
             >
-              <ExternalLink size={16} className="mr-2" />
+              <ExternalLink size={16} className="ml-2" />
               فتح في نافذة جديدة
             </Button>
           </div>
@@ -147,6 +148,7 @@ const ProjectFilesList: React.FC<ProjectFilesListProps> = ({
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
+                  <Eye size={16} className="ml-1" />
                   عرض
                 </Button>
               </DialogTrigger>
@@ -160,6 +162,7 @@ const ProjectFilesList: React.FC<ProjectFilesListProps> = ({
                       size="sm"
                       onClick={() => window.open(file.file_url, '_blank')}
                     >
+                      <ExternalLink size={16} className="ml-2" />
                       فتح في نافذة جديدة
                     </Button>
                   </DialogDescription>
@@ -175,6 +178,7 @@ const ProjectFilesList: React.FC<ProjectFilesListProps> = ({
               size="sm"
               onClick={() => onDownload(file)}
             >
+              <Download size={16} className="ml-1" />
               تنزيل
             </Button>
             <Button 
@@ -183,6 +187,7 @@ const ProjectFilesList: React.FC<ProjectFilesListProps> = ({
               className="text-red-500 border-red-200 hover:bg-red-50"
               onClick={() => onDelete(file)}
             >
+              <Trash2 size={16} className="ml-1" />
               حذف
             </Button>
           </div>
