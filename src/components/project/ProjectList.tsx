@@ -21,7 +21,7 @@ import {
 
 interface Project {
   id: string;
-  title: string;
+  name: string;
   category?: string;
   image?: string;
   location?: string;
@@ -54,6 +54,8 @@ const ProjectList: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      
+      console.log("Fetched projects:", data);
       setProjects(data || []);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -144,13 +146,13 @@ const ProjectList: React.FC = () => {
             <div className="h-48 overflow-hidden">
               <img 
                 src={project.image || '/placeholder.svg'} 
-                alt={project.title} 
+                alt={project.name} 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
             </div>
             <div className="p-4">
               <div className="flex justify-between items-start mb-2">
-                <h3 className="text-lg font-bold text-construction-primary">{project.title}</h3>
+                <h3 className="text-lg font-bold text-construction-primary">{project.name}</h3>
                 <span className={`text-white text-xs py-1 px-2 rounded ${getStatusBadgeColor(project.status)}`}>
                   {project.status || 'جديد'}
                 </span>
@@ -231,7 +233,7 @@ const ProjectList: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>هل أنت متأكد من رغبتك في حذف هذا المشروع؟</AlertDialogTitle>
             <AlertDialogDescription>
-              سيتم حذف المشروع "{projectToDelete?.title}" بشكل نهائي. لا يمكن التراجع عن هذا الإجراء.
+              سيتم حذف المشروع "{projectToDelete?.name}" بشكل نهائي. لا يمكن التراجع عن هذا الإجراء.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

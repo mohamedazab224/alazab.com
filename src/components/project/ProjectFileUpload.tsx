@@ -33,19 +33,29 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
     setUploading(true);
 
     try {
-      // المرحلة الأولى: إنشاء سجل في قاعدة البيانات لكل ملف
+      // تحميل الملفات وإضافتها إلى قاعدة البيانات
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const filePath = `project_files/${projectId}/${fileName}`;
         
-        // في بيئة حقيقية، يمكننا تحميل الملف إلى Supabase Storage أولاً
-        // ثم استخدام الرابط المُنشأ للملف، ولكن هنا نستخدم محاكاة بسيطة
+        // تحميل الملف إلى Supabase Storage
+        const { data: fileData, error: uploadError } = await supabase.storage
+          .from('projects')
+          .upload(filePath, file);
         
-        const fileUrl = `https://example.com/files/${fileName}`; // هذا محاكاة فقط
-
+        if (uploadError) throw uploadError;
+        
+        // الحصول على رابط الملف
+        const { data: urlData } = await supabase.storage
+          .from('projects')
+          .getPublicUrl(filePath);
+        
+        const fileUrl = urlData?.publicUrl || '';
+        
         // إنشاء سجل في قاعدة البيانات للملف
-        const { error } = await supabase
+        const { error: dbError } = await supabase
           .from('project_files')
           .insert({
             project_id: projectId,
@@ -55,7 +65,7 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
             type: file.type
           });
 
-        if (error) throw error;
+        if (dbError) throw dbError;
       }
 
       toast({
@@ -69,6 +79,8 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
       
       // إعادة تعيين حقل الملف
       setFiles(null);
+      const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
       
     } catch (error) {
       console.error("Error uploading files:", error);

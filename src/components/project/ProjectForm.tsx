@@ -21,7 +21,7 @@ import { supabase } from "@/lib/supabase";
 
 // تعريف نموذج الإدخال باستخدام Zod
 const projectFormSchema = z.object({
-  title: z.string().min(2, {
+  name: z.string().min(2, {
     message: "يجب أن يكون عنوان المشروع بطول حرفين على الأقل",
   }),
   category: z.string({
@@ -56,7 +56,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEdi
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
-      title: initialData?.title || "",
+      name: initialData?.name || "",
       category: initialData?.category || "",
       location: initialData?.location || "",
       image: initialData?.image || "",
@@ -69,12 +69,14 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEdi
 
   const onSubmit = async (data: ProjectFormValues) => {
     try {
-      if (isEditing && initialData?.title) {
+      console.log("Submitting data:", data);
+      
+      if (isEditing && initialData?.name) {
         // تحديث مشروع موجود
         const { error } = await supabase
           .from('projects')
           .update(data)
-          .eq('title', initialData.title);
+          .eq('name', initialData.name);
 
         if (error) throw error;
 
@@ -114,7 +116,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEdi
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="title"
+          name="name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>عنوان المشروع</FormLabel>

@@ -23,11 +23,12 @@ import PageLayout from '../components/layout/PageLayout';
 import ProjectViewer3D from '../components/project/ProjectViewer3D';
 import ProjectFileUpload from '../components/project/ProjectFileUpload';
 import ProjectFilesList from '../components/project/ProjectFilesList';
+import ProjectStatusChange from '../components/project/ProjectStatusChange';
 import { ArrowRight } from 'lucide-react';
 
 interface Project {
   id: string;
-  title: string;
+  name: string;
   category?: string;
   image?: string;
   location?: string;
@@ -125,12 +126,24 @@ const ProjectDetails: React.FC = () => {
 
   const handleDeleteFile = async (file: ProjectFile) => {
     try {
+      // حذف الملف من قاعدة البيانات
       const { error } = await supabase
         .from('project_files')
         .delete()
         .eq('id', file.id);
 
       if (error) throw error;
+      
+      // استخراج اسم الملف من الرابط
+      const filePath = file.file_url.split('/').pop();
+      if (filePath) {
+        // حذف الملف من التخزين
+        const { error: storageError } = await supabase.storage
+          .from('projects')
+          .remove([`project_files/${projectId}/${filePath}`]);
+          
+        if (storageError) console.error("Error deleting file from storage:", storageError);
+      }
 
       setFiles(files.filter(f => f.id !== file.id));
       toast({
@@ -145,6 +158,10 @@ const ProjectDetails: React.FC = () => {
         description: "حدث خطأ أثناء محاولة حذف الملف"
       });
     }
+  };
+
+  const handleStatusChanged = () => {
+    fetchProjectDetails();
   };
 
   const getStatusColor = (status?: string) => {
@@ -183,7 +200,7 @@ const ProjectDetails: React.FC = () => {
   }
 
   return (
-    <PageLayout title={`مشروع: ${project.title}`}>
+    <PageLayout title={`مشروع: ${project.name}`}>
       <div className="mb-6">
         <Link to="/project-management" className="text-construction-primary hover:underline flex items-center">
           <ArrowRight className="ml-2" size={16} />
@@ -197,14 +214,14 @@ const ProjectDetails: React.FC = () => {
           <div className="rounded-lg overflow-hidden border border-gray-200 h-[250px]">
             <img 
               src={project.image || '/placeholder.svg'} 
-              alt={project.title} 
+              alt={project.name} 
               className="w-full h-full object-cover"
             />
           </div>
         </div>
         <div className="md:w-2/3">
           <div className="flex justify-between items-start mb-2">
-            <h1 className="text-3xl font-bold text-construction-primary">{project.title}</h1>
+            <h1 className="text-3xl font-bold text-construction-primary">{project.name}</h1>
             <span className={`text-white px-3 py-1 rounded-full text-sm ${getStatusColor(project.status)}`}>
               {project.status || 'جديد'}
             </span>
@@ -243,6 +260,7 @@ const ProjectDetails: React.FC = () => {
           <TabsTrigger value="details">تفاصيل المشروع</TabsTrigger>
           <TabsTrigger value="files">ملفات المشروع</TabsTrigger>
           <TabsTrigger value="3d">عرض ثلاثي الأبعاد</TabsTrigger>
+          <TabsTrigger value="status">حالة المشروع</TabsTrigger>
         </TabsList>
 
         <TabsContent value="details">
@@ -258,7 +276,7 @@ const ProjectDetails: React.FC = () => {
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-sm font-medium text-gray-500">اسم المشروع</h4>
-                      <p>{project.title}</p>
+                      <p>{project.name}</p>
                     </div>
                     {project.category && (
                       <div>
@@ -336,6 +354,23 @@ const ProjectDetails: React.FC = () => {
             </CardHeader>
             <CardContent>
               <ProjectViewer3D embedUrl={project.model3d_url || ''} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="status">
+          <Card>
+            <CardHeader>
+              <CardTitle>تحديث حالة المشروع</CardTitle>
+              <CardDescription>قم بتحديث حالة المشروع ونسبة الإنجاز</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProjectStatusChange 
+                projectId={project.id}
+                currentStatus={project.status || 'جديد'}
+                currentProgress={project.progress || 0}
+                onStatusChanged={handleStatusChanged}
+              />
             </CardContent>
           </Card>
         </TabsContent>
