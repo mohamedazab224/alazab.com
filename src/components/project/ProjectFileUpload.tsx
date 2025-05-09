@@ -20,6 +20,34 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
     setFiles(e.target.files);
   };
 
+  const createBucketIfNotExists = async () => {
+    try {
+      // التحقق من وجود خزنة التخزين
+      const { data, error } = await supabase.storage.getBucket('projects');
+      
+      if (error) {
+        console.log('Creating storage bucket since it does not exist');
+        // إنشاء الخزنة إذا لم تكن موجودة
+        const { data: newBucket, error: createError } = await supabase.storage
+          .createBucket('projects', {
+            public: true,
+            fileSizeLimit: 10485760 // 10 ميجابايت
+          });
+          
+        if (createError) {
+          throw createError;
+        }
+        
+        return true;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error checking/creating bucket:', error);
+      return false;
+    }
+  };
+
   const handleUpload = async () => {
     if (!files || files.length === 0) {
       toast({
@@ -33,6 +61,13 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
     setUploading(true);
 
     try {
+      // إنشاء خزنة التخزين إذا لم تكن موجودة
+      const bucketCreated = await createBucketIfNotExists();
+      
+      if (!bucketCreated) {
+        throw new Error('فشل إنشاء خزنة التخزين');
+      }
+      
       // تحميل الملفات وإضافتها إلى قاعدة البيانات
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -40,32 +75,32 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = `project_files/${projectId}/${fileName}`;
         
-        // التحقق من وجود خزنة التخزين قبل التحميل
-        const { data: bucketData, error: bucketError } = await supabase.storage.getBucket('projects');
-        if (bucketError) {
-          // إنشاء الخزنة إذا لم تكن موجودة
-          await supabase.storage.createBucket('projects', {
-            public: true,
-            fileSizeLimit: 10485760 // 10 ميجابايت
-          });
-        }
+        console.log(`Uploading file ${i+1}/${files.length}: ${filePath}`);
         
         // تحميل الملف إلى Supabase Storage
         const { data: fileData, error: uploadError } = await supabase.storage
           .from('projects')
           .upload(filePath, file);
         
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("File upload error:", uploadError);
+          throw uploadError;
+        }
         
         // الحصول على رابط الملف
-        const { data: urlData } = await supabase.storage
+        const { data: urlData, error: urlError } = await supabase.storage
           .from('projects')
           .getPublicUrl(filePath);
+        
+        if (urlError) {
+          console.error("Error getting file URL:", urlError);
+          throw urlError;
+        }
         
         const fileUrl = urlData?.publicUrl || '';
         
         // إنشاء سجل في قاعدة البيانات للملف
-        const { error: dbError } = await supabase
+        const { data: dbData, error: dbError } = await supabase
           .from('project_files')
           .insert({
             project_id: projectId,
@@ -75,7 +110,10 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
             type: file.type
           });
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          console.error("Database insert error:", dbError);
+          throw dbError;
+        }
       }
 
       toast({
