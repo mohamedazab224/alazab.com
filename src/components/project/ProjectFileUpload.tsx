@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { Upload, File } from "lucide-react";
 
 interface ProjectFileUploadProps {
-  projectId: number;
+  projectId: string;
   onFileUploaded?: () => void;
 }
 
@@ -33,11 +33,30 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
     setUploading(true);
 
     try {
-      // This is a placeholder for the actual file upload logic
-      // In a real implementation, you would upload to Supabase storage
-      // and save the file references in a project_files table
-      
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulating upload delay
+      // المرحلة الأولى: إنشاء سجل في قاعدة البيانات لكل ملف
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        
+        // في بيئة حقيقية، يمكننا تحميل الملف إلى Supabase Storage أولاً
+        // ثم استخدام الرابط المُنشأ للملف، ولكن هنا نستخدم محاكاة بسيطة
+        
+        const fileUrl = `https://example.com/files/${fileName}`; // هذا محاكاة فقط
+
+        // إنشاء سجل في قاعدة البيانات للملف
+        const { error } = await supabase
+          .from('project_files')
+          .insert({
+            project_id: projectId,
+            name: file.name,
+            file_url: fileUrl,
+            size: file.size,
+            type: file.type
+          });
+
+        if (error) throw error;
+      }
 
       toast({
         title: "تم تحميل الملفات بنجاح",
@@ -48,7 +67,7 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
         onFileUploaded();
       }
       
-      // Reset the file input
+      // إعادة تعيين حقل الملف
       setFiles(null);
       
     } catch (error) {

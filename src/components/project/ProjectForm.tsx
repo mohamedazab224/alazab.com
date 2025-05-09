@@ -36,48 +36,75 @@ const projectFormSchema = z.object({
   description: z.string().min(10, {
     message: "يجب أن يكون الوصف بطول 10 أحرف على الأقل",
   }).optional(),
+  status: z.string().optional(),
+  model3d_url: z.string().url({ 
+    message: "يرجى إدخال رابط نموذج ثلاثي الأبعاد صالح" 
+  }).optional().or(z.literal('')),
+  progress: z.coerce.number().min(0).max(100).optional(),
 });
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
 
 interface ProjectFormProps {
   onSuccess?: () => void;
+  initialData?: Partial<ProjectFormValues>;
+  isEditing?: boolean;
 }
 
-const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess }) => {
+const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEditing = false }) => {
   const { toast } = useToast();
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
-      title: "",
-      category: "",
-      location: "",
-      image: "",
-      description: "",
+      title: initialData?.title || "",
+      category: initialData?.category || "",
+      location: initialData?.location || "",
+      image: initialData?.image || "",
+      description: initialData?.description || "",
+      status: initialData?.status || "جديد",
+      model3d_url: initialData?.model3d_url || "",
+      progress: initialData?.progress || 0,
     },
   });
 
   const onSubmit = async (data: ProjectFormValues) => {
     try {
-      const { error } = await supabase
-        .from('projects')
-        .insert([data]);
+      if (isEditing && initialData?.title) {
+        // تحديث مشروع موجود
+        const { error } = await supabase
+          .from('projects')
+          .update(data)
+          .eq('title', initialData.title);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "تم إضافة المشروع بنجاح",
-        description: "تمت إضافة المشروع الجديد إلى قاعدة البيانات",
-      });
+        toast({
+          title: "تم تحديث المشروع بنجاح",
+          description: "تم تحديث بيانات المشروع في قاعدة البيانات",
+        });
+      } else {
+        // إضافة مشروع جديد
+        const { error } = await supabase
+          .from('projects')
+          .insert([data]);
 
-      form.reset();
+        if (error) throw error;
+
+        toast({
+          title: "تم إضافة المشروع بنجاح",
+          description: "تمت إضافة المشروع الجديد إلى قاعدة البيانات",
+        });
+
+        form.reset();
+      }
+      
       if (onSuccess) onSuccess();
     } catch (error) {
-      console.error("Error adding project:", error);
+      console.error("Error saving project:", error);
       toast({
         variant: "destructive",
-        title: "خطأ في إضافة المشروع",
-        description: "حدث خطأ أثناء محاولة إضافة المشروع. يرجى المحاولة مرة أخرى.",
+        title: "خطأ في حفظ المشروع",
+        description: "حدث خطأ أثناء محاولة حفظ المشروع. يرجى المحاولة مرة أخرى.",
       });
     }
   };
@@ -172,6 +199,71 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess }) => {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>حالة المشروع</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر حالة المشروع" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="جديد">جديد</SelectItem>
+                  <SelectItem value="قيد التنفيذ">قيد التنفيذ</SelectItem>
+                  <SelectItem value="مكتمل">مكتمل</SelectItem>
+                  <SelectItem value="متوقف">متوقف</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="progress"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>نسبة إنجاز المشروع ({field.value}%)</FormLabel>
+              <FormControl>
+                <Input 
+                  type="range" 
+                  min="0" 
+                  max="100" 
+                  step="5"
+                  className="w-full" 
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="model3d_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>رابط النموذج ثلاثي الأبعاد (اختياري)</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="أدخل رابط النموذج ثلاثي الأبعاد" 
+                  {...field} 
+                />
+              </FormControl>
+              <FormDescription>
+                يمكنك استخدام رابط من خدمات مثل Matterport أو SketchFab أو أي منصة أخرى تدعم العرض ثلاثي الأبعاد
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
         <div className="flex justify-end gap-3 pt-2">
           <Button 
@@ -186,7 +278,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess }) => {
             className="bg-construction-primary hover:bg-construction-dark"
             disabled={form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? "جارٍ الحفظ..." : "حفظ المشروع"}
+            {form.formState.isSubmitting ? "جارٍ الحفظ..." : isEditing ? "حفظ التغييرات" : "حفظ المشروع"}
           </Button>
         </div>
       </form>

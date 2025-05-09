@@ -18,6 +18,7 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import PageLayout from '../components/layout/PageLayout';
 import ProjectViewer3D from '../components/project/ProjectViewer3D';
 import ProjectFileUpload from '../components/project/ProjectFileUpload';
@@ -25,22 +26,24 @@ import ProjectFilesList from '../components/project/ProjectFilesList';
 import { ArrowRight } from 'lucide-react';
 
 interface Project {
-  id: number;
+  id: string;
   title: string;
-  category: string;
-  image: string;
-  location: string;
+  category?: string;
+  image?: string;
+  location?: string;
   description?: string;
   created_at: string;
+  status?: string;
+  progress?: number;
   model3d_url?: string;
 }
 
 interface ProjectFile {
-  id: number;
+  id: string;
   name: string;
   size: number;
   type: string;
-  url: string;
+  file_url: string;
   uploaded_at: string;
 }
 
@@ -49,95 +52,109 @@ const ProjectDetails: React.FC = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [files, setFiles] = useState<ProjectFile[]>([]);
+  const [loadingFiles, setLoadingFiles] = useState(false);
   const { toast } = useToast();
 
-  // For demonstration purposes only
-  const demoFiles: ProjectFile[] = [
-    {
-      id: 1,
-      name: 'خطة_المشروع.pdf',
-      size: 2500000,
-      type: 'application/pdf',
-      url: '#',
-      uploaded_at: '2023-05-15T10:30:00'
-    },
-    {
-      id: 2,
-      name: 'رسومات_هندسية.dwg',
-      size: 8750000,
-      type: 'application/acad',
-      url: '#',
-      uploaded_at: '2023-05-16T14:20:00'
-    },
-    {
-      id: 3,
-      name: 'التقرير_الشهري.docx',
-      size: 1200000,
-      type: 'application/msword',
-      url: '#',
-      uploaded_at: '2023-06-01T09:15:00'
-    },
-  ];
-
   useEffect(() => {
-    const fetchProjectDetails = async () => {
-      if (!projectId) return;
+    if (projectId) {
+      fetchProjectDetails();
+      fetchProjectFiles();
+    }
+  }, [projectId]);
+
+  const fetchProjectDetails = async () => {
+    if (!projectId) return;
+    
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', projectId)
+        .single();
+
+      if (error) throw error;
       
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('id', projectId)
-          .single();
+      setProject(data);
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+      toast({
+        variant: "destructive",
+        title: "خطأ في جلب بيانات المشروع",
+        description: "حدث خطأ أثناء محاولة استرداد بيانات المشروع"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (error) throw error;
-        
-        setProject(data);
-        // In a real implementation, you would fetch files from a project_files table
-        setFiles(demoFiles);
-        
-      } catch (error) {
-        console.error("Error fetching project details:", error);
-        toast({
-          variant: "destructive",
-          title: "خطأ في جلب بيانات المشروع",
-          description: "حدث خطأ أثناء محاولة استرداد بيانات المشروع"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchProjectFiles = async () => {
+    if (!projectId) return;
+    
+    try {
+      setLoadingFiles(true);
+      const { data, error } = await supabase
+        .from('project_files')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('uploaded_at', { ascending: false });
 
-    fetchProjectDetails();
-  }, [projectId, toast]);
+      if (error) throw error;
+      
+      setFiles(data || []);
+    } catch (error) {
+      console.error("Error fetching project files:", error);
+      toast({
+        variant: "destructive",
+        title: "خطأ في جلب ملفات المشروع",
+        description: "حدث خطأ أثناء محاولة استرداد ملفات المشروع"
+      });
+    } finally {
+      setLoadingFiles(false);
+    }
+  };
 
   const handleDownloadFile = (file: ProjectFile) => {
+    // في بيئة حقيقية، سنقوم بتنزيل الملف باستخدام الرابط
+    window.open(file.file_url, '_blank');
     toast({
       title: "جاري التنزيل",
       description: `جاري تنزيل الملف: ${file.name}`
     });
   };
 
-  const handleDeleteFile = (file: ProjectFile) => {
-    setFiles(files.filter(f => f.id !== file.id));
-    toast({
-      title: "تم حذف الملف",
-      description: `تم حذف الملف: ${file.name}`
-    });
+  const handleDeleteFile = async (file: ProjectFile) => {
+    try {
+      const { error } = await supabase
+        .from('project_files')
+        .delete()
+        .eq('id', file.id);
+
+      if (error) throw error;
+
+      setFiles(files.filter(f => f.id !== file.id));
+      toast({
+        title: "تم حذف الملف",
+        description: `تم حذف الملف: ${file.name}`
+      });
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      toast({
+        variant: "destructive",
+        title: "خطأ في حذف الملف",
+        description: "حدث خطأ أثناء محاولة حذف الملف"
+      });
+    }
   };
 
-  const handleFileUploaded = () => {
-    // In a real implementation, you would fetch the updated files list
-    const newFile: ProjectFile = {
-      id: files.length + 1,
-      name: `ملف_جديد_${files.length + 1}.pdf`,
-      size: 1500000,
-      type: 'application/pdf',
-      url: '#',
-      uploaded_at: new Date().toISOString()
-    };
-    setFiles([...files, newFile]);
+  const getStatusColor = (status?: string) => {
+    switch(status) {
+      case 'جديد': return 'bg-blue-500';
+      case 'قيد التنفيذ': return 'bg-yellow-500';
+      case 'مكتمل': return 'bg-green-500';
+      case 'متوقف': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
   };
 
   if (loading) {
@@ -165,9 +182,6 @@ const ProjectDetails: React.FC = () => {
     );
   }
 
-  // For demo purposes, we'll use a sample 3D model URL if none exists
-  const model3dUrl = project.model3d_url || "https://3d.magicplan.app/#embed/?key=OTFhN2IzZDJlYzA5MjZjMTdhZWUwMTFkYWY3ZGUxYTM3MTVmYWNkMmUzNmFhMjhlYTRmMDFjMWYyZjMxODJhOQN2seYQI5jHZXOfu%2Bo%2BOP3bamgnXoK2JsQaKPNW1w4oFZwnqUoHDzv2RwW3fHZBsg%3D%3D";
-
   return (
     <PageLayout title={`مشروع: ${project.title}`}>
       <div className="mb-6">
@@ -182,20 +196,38 @@ const ProjectDetails: React.FC = () => {
         <div className="md:w-1/3">
           <div className="rounded-lg overflow-hidden border border-gray-200 h-[250px]">
             <img 
-              src={project.image} 
+              src={project.image || '/placeholder.svg'} 
               alt={project.title} 
               className="w-full h-full object-cover"
             />
           </div>
         </div>
         <div className="md:w-2/3">
-          <h1 className="text-3xl font-bold text-construction-primary mb-2">{project.title}</h1>
+          <div className="flex justify-between items-start mb-2">
+            <h1 className="text-3xl font-bold text-construction-primary">{project.title}</h1>
+            <span className={`text-white px-3 py-1 rounded-full text-sm ${getStatusColor(project.status)}`}>
+              {project.status || 'جديد'}
+            </span>
+          </div>
+          
+          {(project.progress !== undefined && project.progress > 0) && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between text-sm mb-1">
+                <span className="font-medium">نسبة الإنجاز</span>
+                <span>{project.progress}%</span>
+              </div>
+              <Progress value={project.progress} className="h-2" />
+            </div>
+          )}
+          
           <div className="flex flex-wrap gap-4 mb-4">
+            {project.category && (
+              <div className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+                <span className="font-bold ml-1">الفئة:</span> {project.category}
+              </div>
+            )}
             <div className="bg-gray-100 px-3 py-1 rounded-full text-sm">
               <span className="font-bold ml-1">الموقع:</span> {project.location}
-            </div>
-            <div className="bg-gray-100 px-3 py-1 rounded-full text-sm">
-              <span className="font-bold ml-1">التصنيف:</span> {project.category}
             </div>
             <div className="bg-gray-100 px-3 py-1 rounded-full text-sm">
               <span className="font-bold ml-1">تاريخ الإنشاء:</span> {new Date(project.created_at).toLocaleDateString('ar-EG')}
@@ -228,18 +260,36 @@ const ProjectDetails: React.FC = () => {
                       <h4 className="text-sm font-medium text-gray-500">اسم المشروع</h4>
                       <p>{project.title}</p>
                     </div>
+                    {project.category && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">الفئة</h4>
+                        <p>{project.category}</p>
+                      </div>
+                    )}
                     <div>
                       <h4 className="text-sm font-medium text-gray-500">الموقع</h4>
                       <p>{project.location}</p>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-500">التصنيف</h4>
-                      <p>{project.category}</p>
+                      <h4 className="text-sm font-medium text-gray-500">الحالة</h4>
+                      <p className="flex items-center">
+                        <span className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusColor(project.status)}`}></span>
+                        {project.status || 'جديد'}
+                      </p>
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-gray-500">تاريخ الإنشاء</h4>
                       <p>{new Date(project.created_at).toLocaleDateString('ar-EG')}</p>
                     </div>
+                    {(project.progress !== undefined) && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">نسبة الإنجاز</h4>
+                        <div className="flex items-center gap-2">
+                          <Progress value={project.progress} className="h-2 w-32" />
+                          <span>{project.progress}%</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div>
@@ -258,14 +308,21 @@ const ProjectDetails: React.FC = () => {
               <CardDescription>يمكنك تحميل وإدارة ملفات المشروع من هنا</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <ProjectFileUpload projectId={project.id} onFileUploaded={handleFileUploaded} />
+              <ProjectFileUpload 
+                projectId={project.id} 
+                onFileUploaded={fetchProjectFiles} 
+              />
               <div>
                 <h3 className="text-lg font-medium mb-4">الملفات المرفوعة</h3>
-                <ProjectFilesList 
-                  files={files} 
-                  onDownload={handleDownloadFile} 
-                  onDelete={handleDeleteFile} 
-                />
+                {loadingFiles ? (
+                  <div className="text-center py-8">جاري تحميل الملفات...</div>
+                ) : (
+                  <ProjectFilesList 
+                    files={files} 
+                    onDownload={handleDownloadFile} 
+                    onDelete={handleDeleteFile} 
+                  />
+                )}
               </div>
             </CardContent>
           </Card>
@@ -278,7 +335,7 @@ const ProjectDetails: React.FC = () => {
               <CardDescription>استعرض المشروع بتقنية ثلاثية الأبعاد</CardDescription>
             </CardHeader>
             <CardContent>
-              <ProjectViewer3D embedUrl={model3dUrl} />
+              <ProjectViewer3D embedUrl={project.model3d_url || ''} />
             </CardContent>
           </Card>
         </TabsContent>

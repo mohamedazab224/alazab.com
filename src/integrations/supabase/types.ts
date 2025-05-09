@@ -739,6 +739,44 @@ export type Database = {
           },
         ]
       }
+      project_files: {
+        Row: {
+          file_url: string
+          id: string
+          name: string
+          project_id: string
+          size: number
+          type: string
+          uploaded_at: string
+        }
+        Insert: {
+          file_url: string
+          id?: string
+          name: string
+          project_id: string
+          size: number
+          type: string
+          uploaded_at?: string
+        }
+        Update: {
+          file_url?: string
+          id?: string
+          name?: string
+          project_id?: string
+          size?: number
+          type?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_tasks: {
         Row: {
           created_at: string | null
@@ -760,33 +798,45 @@ export type Database = {
       projects: {
         Row: {
           assigned_to: string | null
+          category: string | null
           created_at: string | null
           description: string | null
           id: string
+          image: string | null
           location: string | null
+          model3d_url: string | null
           name: string
           notes: string | null
           progress: number | null
+          status: string | null
         }
         Insert: {
           assigned_to?: string | null
+          category?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
+          image?: string | null
           location?: string | null
+          model3d_url?: string | null
           name: string
           notes?: string | null
           progress?: number | null
+          status?: string | null
         }
         Update: {
           assigned_to?: string | null
+          category?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
+          image?: string | null
           location?: string | null
+          model3d_url?: string | null
           name?: string
           notes?: string | null
           progress?: number | null
+          status?: string | null
         }
         Relationships: [
           {

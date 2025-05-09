@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash, Eye } from "lucide-react";
+import { Edit, Trash, Eye, FileUp } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
 import ProjectForm from './ProjectForm';
 import {
   AlertDialog,
@@ -19,13 +20,16 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface Project {
-  id: number;
+  id: string;
   title: string;
-  category: string;
-  image: string;
-  location: string;
+  category?: string;
+  image?: string;
+  location?: string;
   description?: string;
   created_at: string;
+  status?: string;
+  progress?: number;
+  model3d_url?: string;
 }
 
 const ProjectList: React.FC = () => {
@@ -102,6 +106,21 @@ const ProjectList: React.FC = () => {
     setIsDeleteDialogOpen(true);
   };
 
+  const getStatusBadgeColor = (status?: string) => {
+    switch(status) {
+      case 'جديد': return 'bg-blue-500';
+      case 'قيد التنفيذ': return 'bg-yellow-500';
+      case 'مكتمل': return 'bg-green-500';
+      case 'متوقف': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const handleEditSuccess = () => {
+    setIsEditingOpen(false);
+    fetchProjects();
+  };
+
   if (loading) {
     return <div className="text-center py-10">جارٍ تحميل المشاريع...</div>;
   }
@@ -120,11 +139,11 @@ const ProjectList: React.FC = () => {
         {projects.map((project) => (
           <div 
             key={project.id} 
-            className="group relative overflow-hidden rounded-lg shadow-lg border border-gray-200"
+            className="group relative overflow-hidden rounded-lg shadow-lg border border-gray-200 bg-white"
           >
             <div className="h-48 overflow-hidden">
               <img 
-                src={project.image} 
+                src={project.image || '/placeholder.svg'} 
                 alt={project.title} 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
@@ -132,14 +151,30 @@ const ProjectList: React.FC = () => {
             <div className="p-4">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-lg font-bold text-construction-primary">{project.title}</h3>
-                <span className="bg-construction-accent text-white text-xs py-1 px-2 rounded">
-                  {project.category}
+                <span className={`text-white text-xs py-1 px-2 rounded ${getStatusBadgeColor(project.status)}`}>
+                  {project.status || 'جديد'}
                 </span>
               </div>
+              {project.category && (
+                <div className="text-sm text-gray-600 mb-2">
+                  <span className="font-medium ml-1">الفئة:</span> {project.category}
+                </div>
+              )}
               <p className="text-gray-600 text-sm mb-2">{project.location}</p>
               {project.description && (
-                <p className="text-gray-700 text-sm line-clamp-2">{project.description}</p>
+                <p className="text-gray-700 text-sm line-clamp-2 mb-2">{project.description}</p>
               )}
+              
+              {(project.progress !== undefined && project.progress > 0) && (
+                <div className="mb-3">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span>نسبة الإنجاز</span>
+                    <span>{project.progress}%</span>
+                  </div>
+                  <Progress value={project.progress} className="h-2" />
+                </div>
+              )}
+              
               <div className="flex justify-end gap-2 mt-4">
                 <Link to={`/projects/${project.id}`}>
                   <Button 
@@ -179,13 +214,12 @@ const ProjectList: React.FC = () => {
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6">
-            {/* Project edit form will go here */}
             {editingProject && (
-              <div>
-                {/* This would be a full edit form, but for simplicity we just display project info */}
-                <p>تعديل المشروع: {editingProject.title}</p>
-                {/* You would implement a full form similar to ProjectForm but with editing logic */}
-              </div>
+              <ProjectForm 
+                initialData={editingProject} 
+                isEditing={true} 
+                onSuccess={handleEditSuccess}
+              />
             )}
           </div>
         </SheetContent>
