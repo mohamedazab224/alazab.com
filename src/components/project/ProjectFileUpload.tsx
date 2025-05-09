@@ -87,43 +87,42 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
           throw uploadError;
         }
         
-        // الحصول على رابط الملف
-        const { data: urlData, error: urlError } = await supabase.storage
-          .from('projects')
-          .getPublicUrl(filePath);
-        
-        if (urlError) {
-          console.error("Error getting file URL:", urlError);
-          throw urlError;
-        }
-        
-        const fileUrl = urlData?.publicUrl || '';
-        
-        // إنشاء سجل في قاعدة البيانات للملف
-        const { data: dbData, error: dbError } = await supabase
-          .from('project_files')
-          .insert({
-            project_id: projectId,
-            name: file.name,
-            file_url: fileUrl,
-            size: file.size,
-            type: file.type
-          });
+// الحصول على رابط الملف
+const { publicUrl } = supabase.storage
+  .from('projects')
+  .getPublicUrl(filePath);
 
-        if (dbError) {
-          console.error("Database insert error:", dbError);
-          throw dbError;
-        }
-      }
+if (!publicUrl) {
+  console.error("Error getting file URL: Public URL is undefined");
+  throw new Error("فشل في الحصول على رابط الملف");
+}
 
-      toast({
-        title: "تم تحميل الملفات بنجاح",
-        description: `تم تحميل ${files.length} ملفات للمشروع`
-      });
+const fileUrl = publicUrl;
 
-      if (onFileUploaded) {
-        onFileUploaded();
-      }
+// إنشاء سجل في قاعدة البيانات للملف
+const { data: dbData, error: dbError } = await supabase
+  .from('project_files')
+  .insert({
+    project_id: projectId,
+    name: file.name,
+    file_url: fileUrl,
+    size: file.size,
+    type: file.type,
+  });
+
+if (dbError) {
+  console.error("Database insert error:", dbError);
+  throw dbError;
+}
+
+toast({
+  title: "تم تحميل الملفات بنجاح",
+  description: `تم تحميل ${files.length} ملفات للمشروع`,
+});
+
+if (onFileUploaded) {
+  onFileUploaded();
+}
       
       // إعادة تعيين حقل الملف
       setFiles(null);
