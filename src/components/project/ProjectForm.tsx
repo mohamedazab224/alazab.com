@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -47,11 +46,17 @@ type ProjectFormValues = z.infer<typeof projectFormSchema>;
 
 interface ProjectFormProps {
   onSuccess?: () => void;
+  onCancel?: () => void;
   initialData?: Partial<ProjectFormValues>;
   isEditing?: boolean;
 }
 
-const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEditing = false }) => {
+const ProjectForm: React.FC<ProjectFormProps> = ({ 
+  onSuccess, 
+  onCancel, 
+  initialData, 
+  isEditing = false 
+}) => {
   const { toast } = useToast();
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectFormSchema),
@@ -69,14 +74,12 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEdi
 
   const onSubmit = async (data: ProjectFormValues) => {
     try {
-      console.log("Submitting data:", data);
-      
-      if (isEditing && initialData?.name) {
+      if (isEditing && initialData?.id) {
         // تحديث مشروع موجود
         const { error } = await supabase
           .from('projects')
           .update(data)
-          .eq('name', initialData.name);
+          .eq('id', initialData.id);
 
         if (error) throw error;
 
@@ -86,9 +89,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEdi
         });
       } else {
         // إضافة مشروع جديد
-        const { error } = await supabase
+        const { data: insertedData, error } = await supabase
           .from('projects')
-          .insert([data]);
+          .insert([data])
+          .select();
 
         if (error) throw error;
 
@@ -106,7 +110,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEdi
       toast({
         variant: "destructive",
         title: "خطأ في حفظ المشروع",
-        description: "حدث خطأ أثناء محاولة حفظ المشروع. يرجى المحاولة مرة أخرى.",
+        description: error instanceof Error ? error.message : "حدث خطأ أثناء محاولة حفظ المشروع. يرجى المحاولة مرة أخرى.",
       });
     }
   };
@@ -114,50 +118,52 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEdi
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>عنوان المشروع</FormLabel>
-              <FormControl>
-                <Input placeholder="أدخل عنوان المشروع" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>فئة المشروع</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>عنوان المشروع *</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر فئة المشروع" />
-                  </SelectTrigger>
+                  <Input placeholder="أدخل عنوان المشروع" {...field} />
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="المباني السكنية">المباني السكنية</SelectItem>
-                  <SelectItem value="المباني التجارية">المباني التجارية</SelectItem>
-                  <SelectItem value="الفلل الخاصة">الفلل الخاصة</SelectItem>
-                  <SelectItem value="المجمعات السكنية">المجمعات السكنية</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>فئة المشروع *</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر فئة المشروع" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="المباني السكنية">المباني السكنية</SelectItem>
+                    <SelectItem value="المباني التجارية">المباني التجارية</SelectItem>
+                    <SelectItem value="الفلل الخاصة">الفلل الخاصة</SelectItem>
+                    <SelectItem value="المجمعات السكنية">المجمعات السكنية</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={form.control}
           name="location"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>موقع المشروع</FormLabel>
+              <FormLabel>موقع المشروع *</FormLabel>
               <FormControl>
                 <Input placeholder="أدخل موقع المشروع" {...field} />
               </FormControl>
@@ -166,22 +172,44 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEdi
           )}
         />
         
-        <FormField
-          control={form.control}
-          name="image"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>رابط صورة المشروع</FormLabel>
-              <FormControl>
-                <Input placeholder="أدخل رابط صورة المشروع" {...field} />
-              </FormControl>
-              <FormDescription>
-                أدخل رابط URL لصورة المشروع (يمكنك استخدام خدمات استضافة الصور مثل Imgur أو Cloudinary)
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="image"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>رابط صورة المشروع *</FormLabel>
+                <FormControl>
+                  <Input placeholder="أدخل رابط صورة المشروع" {...field} />
+                </FormControl>
+                <FormDescription>
+                  أدخل رابط URL لصورة المشروع (يمكنك استخدام خدمات استضافة الصور مثل Imgur أو Cloudinary)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="model3d_url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>رابط النموذج ثلاثي الأبعاد (اختياري)</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="أدخل رابط النموذج ثلاثي الأبعاد" 
+                    {...field} 
+                  />
+                </FormControl>
+                <FormDescription>
+                  يمكنك استخدام رابط من خدمات مثل Matterport أو SketchFab
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         
         <FormField
           control={form.control}
@@ -192,8 +220,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEdi
               <FormControl>
                 <Textarea 
                   placeholder="أدخل وصفاً مختصراً للمشروع" 
-                  className="resize-none" 
-                  rows={4}
+                  className="resize-none min-h-[120px]" 
                   {...field} 
                 />
               </FormControl>
@@ -202,76 +229,64 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEdi
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>حالة المشروع</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>حالة المشروع</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر حالة المشروع" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="جديد">جديد</SelectItem>
+                    <SelectItem value="قيد التنفيذ">قيد التنفيذ</SelectItem>
+                    <SelectItem value="مكتمل">مكتمل</SelectItem>
+                    <SelectItem value="متوقف">متوقف</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="progress"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>نسبة إنجاز المشروع ({field.value}%)</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر حالة المشروع" />
-                  </SelectTrigger>
+                  <div className="flex items-center gap-4">
+                    <Input 
+                      type="range" 
+                      min="0" 
+                      max="100" 
+                      step="5"
+                      className="w-full" 
+                      {...field} 
+                    />
+                    <span className="text-sm font-medium w-12">
+                      {field.value}%
+                    </span>
+                  </div>
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="جديد">جديد</SelectItem>
-                  <SelectItem value="قيد التنفيذ">قيد التنفيذ</SelectItem>
-                  <SelectItem value="مكتمل">مكتمل</SelectItem>
-                  <SelectItem value="متوقف">متوقف</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="progress"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>نسبة إنجاز المشروع ({field.value}%)</FormLabel>
-              <FormControl>
-                <Input 
-                  type="range" 
-                  min="0" 
-                  max="100" 
-                  step="5"
-                  className="w-full" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="model3d_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>رابط النموذج ثلاثي الأبعاد (اختياري)</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="أدخل رابط النموذج ثلاثي الأبعاد" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormDescription>
-                يمكنك استخدام رابط من خدمات مثل Matterport أو SketchFab أو أي منصة أخرى تدعم العرض ثلاثي الأبعاد
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="flex justify-end gap-3 pt-4">
           <Button 
             type="button" 
             variant="outline" 
-            onClick={() => onSuccess && onSuccess()}
+            onClick={onCancel}
+            disabled={form.formState.isSubmitting}
           >
             إلغاء
           </Button>
@@ -280,7 +295,15 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, initialData, isEdi
             className="bg-construction-primary hover:bg-construction-dark"
             disabled={form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? "جارٍ الحفظ..." : isEditing ? "حفظ التغييرات" : "حفظ المشروع"}
+            {form.formState.isSubmitting ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {isEditing ? "جارٍ التحديث..." : "جارٍ الحفظ..."}
+              </>
+            ) : isEditing ? "حفظ التغييرات" : "حفظ المشروع"}
           </Button>
         </div>
       </form>
