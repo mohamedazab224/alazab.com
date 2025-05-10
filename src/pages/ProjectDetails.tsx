@@ -33,7 +33,10 @@ const ProjectDetails: React.FC = () => {
   if (loading) {
     return (
       <PageLayout title="تفاصيل المشروع">
-        <div className="text-center py-10">جارٍ تحميل بيانات المشروع...</div>
+        <div className="text-center py-10">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-construction-primary mb-4"></div>
+          <p>جارٍ تحميل بيانات المشروع...</p>
+        </div>
       </PageLayout>
     );
   }

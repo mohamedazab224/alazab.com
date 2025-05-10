@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { 
   File, ExternalLink, Eye, Download, Trash2, 
-  FileText, FileImage, FileVideo, FileAudio, 
-  AlertCircle, Check, X
+  FileText, FileImage, FileVideo, FileAudio
 } from "lucide-react";
 import {
   Dialog,
@@ -67,19 +66,22 @@ const ProjectFilesList: React.FC<ProjectFilesListProps> = ({
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return bytes + ' B';
     else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
-    else if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + ' MB';
-    else return (bytes / 1073741824).toFixed(2) + ' GB';
+    else return (bytes / 1048576).toFixed(2) + ' MB';
   };
 
   const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('ar-EG', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('ar-EG', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+    } catch (e) {
+      return "تاريخ غير صالح";
+    }
   };
 
   // تحديد نوع الملف لإظهار المحتوى المناسب
@@ -235,21 +237,23 @@ const ProjectFilesList: React.FC<ProjectFilesListProps> = ({
               <DialogContent className="max-w-4xl">
                 <DialogHeader>
                   <DialogTitle>{file.name}</DialogTitle>
-                  <DialogDescription className="flex flex-wrap justify-between items-center">
-                    <div>
-                      <span>{formatFileSize(file.size)}</span>
-                      <span className="mx-2 text-gray-400">•</span>
-                      <span>{formatDate(file.uploaded_at)}</span>
+                  <DialogDescription>
+                    <div className="flex flex-wrap justify-between items-center">
+                      <div>
+                        <span>{formatFileSize(file.size)}</span>
+                        <span className="mx-2 text-gray-400">•</span>
+                        <span>{formatDate(file.uploaded_at)}</span>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.open(file.file_url, '_blank')}
+                        className="mt-2 sm:mt-0"
+                      >
+                        <ExternalLink size={16} className="ml-2" />
+                        فتح في نافذة جديدة
+                      </Button>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => window.open(file.file_url, '_blank')}
-                      className="mt-2 sm:mt-0"
-                    >
-                      <ExternalLink size={16} className="ml-2" />
-                      فتح في نافذة جديدة
-                    </Button>
                   </DialogDescription>
                 </DialogHeader>
                 <div className="mt-4 overflow-auto">

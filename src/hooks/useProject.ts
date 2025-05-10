@@ -85,12 +85,30 @@ export const useProject = (projectId: string | undefined) => {
   };
 
   const handleDownloadFile = (file: ProjectFile) => {
-    // في بيئة حقيقية، سنقوم بتنزيل الملف باستخدام الرابط
-    window.open(file.file_url, '_blank');
-    toast({
-      title: "جاري التنزيل",
-      description: `جاري تنزيل الملف: ${file.name}`
-    });
+    try {
+      // Create a link element
+      const link = document.createElement("a");
+      link.href = file.file_url;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "جاري التنزيل",
+        description: `جاري تنزيل الملف: ${file.name}`
+      });
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast({
+        variant: "destructive",
+        title: "خطأ في تنزيل الملف",
+        description: "حدث خطأ أثناء محاولة تنزيل الملف"
+      });
+      
+      // Fallback: open in new tab
+      window.open(file.file_url, '_blank');
+    }
   };
 
   const handleDeleteFile = async (file: ProjectFile) => {
@@ -103,17 +121,6 @@ export const useProject = (projectId: string | undefined) => {
 
       if (error) throw error;
       
-      // استخراج اسم الملف من الرابط
-      const filePath = file.file_url.split('/').pop();
-      if (filePath) {
-        // حذف الملف من التخزين
-        const { error: storageError } = await supabase.storage
-          .from('projects')
-          .remove([`project_files/${projectId}/${filePath}`]);
-          
-        if (storageError) console.error("Error deleting file from storage:", storageError);
-      }
-
       setFiles(files.filter(f => f.id !== file.id));
       toast({
         title: "تم حذف الملف",

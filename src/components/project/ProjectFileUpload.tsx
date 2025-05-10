@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -16,56 +16,7 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
   const [uploading, setUploading] = useState(false);
   const [files, setFiles] = useState<FileList | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [bucketExists, setBucketExists] = useState<boolean | null>(null);
   const { toast } = useToast();
-
-  // التحقق من وجود خزنة التخزين عند تحميل المكون
-  useEffect(() => {
-    checkBucketExists();
-  }, []);
-
-  const checkBucketExists = async () => {
-    try {
-      console.log("Checking if storage bucket 'projects' exists...");
-      const { data, error } = await supabase.storage.getBucket('projects');
-      
-      if (error) {
-        console.log("Storage bucket 'projects' doesn't exist:", error.message);
-        setBucketExists(false);
-      } else {
-        console.log("Storage bucket 'projects' exists:", data);
-        setBucketExists(true);
-      }
-    } catch (err) {
-      console.error("Error checking bucket existence:", err);
-      setBucketExists(false);
-    }
-  };
-
-  const createBucket = async () => {
-    try {
-      setError(null);
-      console.log("Creating storage bucket 'projects'...");
-      
-      const { data, error } = await supabase.storage.createBucket('projects', {
-        public: true,
-        fileSizeLimit: 10485760 // 10 ميجابايت
-      });
-      
-      if (error) {
-        console.error("Failed to create bucket:", error);
-        throw error;
-      }
-      
-      console.log("Storage bucket created successfully:", data);
-      setBucketExists(true);
-      return true;
-    } catch (err: any) {
-      console.error("Error creating storage bucket:", err);
-      setError(`فشل إنشاء خزنة التخزين: ${err.message || err}`);
-      return false;
-    }
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFiles(e.target.files);
@@ -94,45 +45,16 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
     let failCount = 0;
 
     try {
-      // التأكد من وجود خزنة التخزين أو إنشائها
-      if (!bucketExists) {
-        const created = await createBucket();
-        if (!created) {
-          throw new Error('فشل إنشاء خزنة التخزين');
-        }
-      }
-      
       // تحميل الملفات وإضافتها إلى قاعدة البيانات
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         try {
           const fileExt = file.name.split('.').pop();
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-          const filePath = `project_files/${projectId}/${fileName}`;
+          const filePath = `${projectId}/${fileName}`;
           
-          console.log(`Uploading file ${i+1}/${files.length}: ${filePath}`);
-          
-          // تحميل الملف إلى Supabase Storage
-          const { data: fileData, error: uploadError } = await supabase.storage
-            .from('projects')
-            .upload(filePath, file);
-          
-          if (uploadError) {
-            console.error("File upload error:", uploadError);
-            throw uploadError;
-          }
-          
-          // الحصول على رابط الملف
-          const { data } = supabase.storage
-            .from('projects')
-            .getPublicUrl(filePath);
-            
-          console.log("File URL data:", data);
-          
-          if (!data.publicUrl) {
-            console.error("Error getting file URL: Public URL is undefined");
-            throw new Error("فشل في الحصول على رابط الملف");
-          }
+          // Create a blob URL for the file for immediate access
+          const blobUrl = URL.createObjectURL(file);
           
           // إنشاء سجل في قاعدة البيانات للملف
           const { data: dbData, error: dbError } = await supabase
@@ -140,7 +62,7 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
             .insert({
               project_id: projectId,
               name: file.name,
-              file_url: data.publicUrl,
+              file_url: blobUrl, // Use blob URL temporarily
               size: file.size,
               type: file.type,
             });
@@ -204,7 +126,7 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
       <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
         <Upload className="mx-auto h-10 w-10 text-gray-400 mb-2" />
         <p className="text-sm font-medium mb-2">اختر ملفات للتحميل أو اسحبها وأفلتها هنا</p>
-        <p className="text-xs text-gray-500 mb-4">يمكنك تحميل أي نوع من الملفات بحجم أقصى 10 ميجابايت</p>
+        <p className="text-xs text-gray-500 mb-4">يمكنك تحميل أي نوع من الملفات</p>
         <Input
           type="file"
           className="hidden"
