@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from "@/lib/supabase";
@@ -354,6 +353,31 @@ const ProjectDetails: React.FC = () => {
             </CardHeader>
             <CardContent>
               <ProjectViewer3D embedUrl={project.model3d_url || ''} />
+              
+              {/* عرض مختصر للرابط مع إمكانية نسخه إذا كان موجودًا */}
+              {project.model3d_url && (
+                <div className="mt-4 p-3 bg-gray-50 rounded border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-gray-700">رابط النموذج ثلاثي الأبعاد:</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(project.model3d_url || '');
+                        toast({
+                          title: "تم النسخ",
+                          description: "تم نسخ رابط النموذج ثلاثي الأبعاد"
+                        });
+                      }}
+                    >
+                      نسخ الرابط
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1 truncate">
+                    {project.model3d_url}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

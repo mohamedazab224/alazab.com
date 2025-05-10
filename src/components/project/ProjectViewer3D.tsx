@@ -21,6 +21,11 @@ const ProjectViewer3D: React.FC<ProjectViewer3DProps> = ({ embedUrl }) => {
               loading="lazy"
             ></iframe>
           </AspectRatio>
+          
+          {/* نخفي عرض الرابط لأنه طويل جدًا ويسبب مشاكل في العرض */}
+          {/* <p className="mt-2 text-xs text-gray-500 truncate">
+            رابط النموذج: {embedUrl}
+          </p> */}
         </div>
       ) : (
         <div className="flex items-center justify-center aspect-video text-gray-500">
