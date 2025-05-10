@@ -42,12 +42,14 @@ const projectFormSchema = z.object({
   progress: z.coerce.number().min(0).max(100).optional(),
 });
 
+// تعريف نوع البيانات مع استخراج النوع من مخطط Zod
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
 
+// تعريف الواجهة البرمجية للمكون مع تضمين خاصية id
 interface ProjectFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
-  initialData?: Partial<ProjectFormValues>;
+  initialData?: Partial<ProjectFormValues> & { id?: string };
   isEditing?: boolean;
 }
 
