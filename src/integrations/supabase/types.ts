@@ -290,6 +290,7 @@ export type Database = {
           actual_cost: number | null
           assigned_to: string | null
           attachments: string[] | null
+          change_log: string | null
           completion_date: string | null
           created_at: string | null
           created_by: string | null
@@ -315,6 +316,7 @@ export type Database = {
           actual_cost?: number | null
           assigned_to?: string | null
           attachments?: string[] | null
+          change_log?: string | null
           completion_date?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -340,6 +342,7 @@ export type Database = {
           actual_cost?: number | null
           assigned_to?: string | null
           attachments?: string[] | null
+          change_log?: string | null
           completion_date?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -797,46 +800,76 @@ export type Database = {
       }
       projects: {
         Row: {
+          area: string | null
           assigned_to: string | null
+          budget: number | null
           category: string | null
+          client_name: string | null
           created_at: string | null
           description: string | null
+          end_date: string | null
+          engineer_name: string | null
           id: string
           image: string | null
           location: string | null
           model3d_url: string | null
           name: string
           notes: string | null
+          order_number: string | null
           progress: number | null
+          project_number: string | null
+          start_date: string | null
           status: string | null
+          tags: string | null
+          work_type: string | null
         }
         Insert: {
+          area?: string | null
           assigned_to?: string | null
+          budget?: number | null
           category?: string | null
+          client_name?: string | null
           created_at?: string | null
           description?: string | null
+          end_date?: string | null
+          engineer_name?: string | null
           id?: string
           image?: string | null
           location?: string | null
           model3d_url?: string | null
           name: string
           notes?: string | null
+          order_number?: string | null
           progress?: number | null
+          project_number?: string | null
+          start_date?: string | null
           status?: string | null
+          tags?: string | null
+          work_type?: string | null
         }
         Update: {
+          area?: string | null
           assigned_to?: string | null
+          budget?: number | null
           category?: string | null
+          client_name?: string | null
           created_at?: string | null
           description?: string | null
+          end_date?: string | null
+          engineer_name?: string | null
           id?: string
           image?: string | null
           location?: string | null
           model3d_url?: string | null
           name?: string
           notes?: string | null
+          order_number?: string | null
           progress?: number | null
+          project_number?: string | null
+          start_date?: string | null
           status?: string | null
+          tags?: string | null
+          work_type?: string | null
         }
         Relationships: [
           {

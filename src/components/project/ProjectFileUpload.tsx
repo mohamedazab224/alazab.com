@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,17 +69,21 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
       }
       
       // تحميل الملفات وإضافتها إلى قاعدة البيانات
-      const uploadPromises = Array.from(files).map(async (file) => {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = `project_files/${projectId}/${fileName}`;
         
+        console.log(`Uploading file ${i+1}/${files.length}: ${filePath}`);
+        
         // تحميل الملف إلى Supabase Storage
-        const { error: uploadError } = await supabase.storage
+        const { data: fileData, error: uploadError } = await supabase.storage
           .from('projects')
           .upload(filePath, file);
         
         if (uploadError) {
+          console.error("File upload error:", uploadError);
           throw uploadError;
         }
         
@@ -88,11 +93,12 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
           .getPublicUrl(filePath);
 
         if (!publicUrl) {
+          console.error("Error getting file URL: Public URL is undefined");
           throw new Error("فشل في الحصول على رابط الملف");
         }
 
         // إنشاء سجل في قاعدة البيانات للملف
-        const { error: dbError } = await supabase
+        const { data: dbData, error: dbError } = await supabase
           .from('project_files')
           .insert({
             project_id: projectId,
@@ -103,12 +109,10 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
           });
 
         if (dbError) {
+          console.error("Database insert error:", dbError);
           throw dbError;
         }
-      });
-
-      // انتظار اكتمال جميع عمليات التحميل
-      await Promise.all(uploadPromises);
+      }
 
       toast({
         title: "تم تحميل الملفات بنجاح",
@@ -123,7 +127,6 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
       setFiles(null);
       const fileInput = document.getElementById('file-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
-      
     } catch (error: any) {
       console.error("Error uploading files:", error);
       toast({
@@ -160,8 +163,10 @@ const ProjectFileUpload: React.FC<ProjectFileUploadProps> = ({ projectId, onFile
         </Button>
         {files && files.length > 0 && (
           <div className="mt-4">
-            <p className="text-sm font-medium mb-2">الملفات المختارة:</p>
-            <ul className="text-sm text-gray-600 space-y-1">
+            <p className="text-sm text-gray-600">
+              تم اختيار {files.length} {files.length === 1 ? 'ملف' : 'ملفات'}
+            </p>
+            <ul className="text-sm text-gray-600 space-y-1 mt-2">
               {Array.from(files).map((file, index) => (
                 <li key={index}>
                   {file.name} - {(file.size / 1024 / 1024).toFixed(2)} MB
