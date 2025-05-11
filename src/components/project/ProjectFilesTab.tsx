@@ -36,28 +36,35 @@ const ProjectFilesTab: React.FC<ProjectFilesTabProps> = ({
   const isClient = typeof window !== 'undefined';
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>ملفات المشروع</CardTitle>
-        <CardDescription>يمكنك تحميل وإدارة ملفات المشروع من هنا</CardDescription>
+    <Card className="overflow-hidden">
+      <CardHeader className="md:px-6">
+        <CardTitle className="text-xl md:text-2xl">ملفات المشروع</CardTitle>
+        <CardDescription className="text-sm md:text-base">يمكنك تحميل وإدارة ملفات المشروع من هنا</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 md:space-y-6 overflow-x-auto md:px-6">
         {isClient && !loadingFiles && (
-          <ProjectFileUpload 
-            projectId={projectId} 
-            onFileUploaded={onFileUploaded} 
-          />
-        )}
-        <div>
-          <h3 className="text-lg font-medium mb-4">الملفات المرفوعة</h3>
-          {loadingFiles ? (
-            <div className="text-center py-8">جاري تحميل الملفات...</div>
-          ) : (
-            <ProjectFilesList 
-              files={files} 
-              onDownload={onDownload} 
-              onDelete={onDelete} 
+          <div className="w-full">
+            <ProjectFileUpload 
+              projectId={projectId} 
+              onFileUploaded={onFileUploaded} 
             />
+          </div>
+        )}
+        <div className="w-full">
+          <h3 className="text-lg font-medium mb-3 md:mb-4">الملفات المرفوعة</h3>
+          {loadingFiles ? (
+            <div className="text-center py-6 md:py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-construction-primary"></div>
+              <p className="mt-2">جاري تحميل الملفات...</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <ProjectFilesList 
+                files={files} 
+                onDownload={onDownload} 
+                onDelete={onDelete} 
+              />
+            </div>
           )}
         </div>
       </CardContent>

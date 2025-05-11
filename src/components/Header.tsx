@@ -59,11 +59,11 @@ const Header: React.FC = () => {
   ];
 
   const SidebarContent = () => (
-    <div className="flex flex-col gap-4 p-4 h-full bg-white">
+    <div className="flex flex-col gap-4 p-4 h-full bg-white overflow-y-auto max-h-full">
       <div className="text-2xl font-bold text-construction-primary mb-6 border-b pb-4">
         العزب <span className="text-construction-accent">للمقاولات</span>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 overflow-y-auto">
         {navigationLinks.map((link) => (
           <Link 
             key={link.path}
@@ -103,13 +103,13 @@ const Header: React.FC = () => {
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}>
       <div className="container mx-auto px-4 flex items-center justify-between">
         <div className="flex items-center">
-          <Link to="/" className="text-2xl font-bold text-construction-primary">
+          <Link to="/" className="text-xl md:text-2xl font-bold text-construction-primary">
             العزب <span className="text-construction-accent">للمقاولات</span>
           </Link>
         </div>
         
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-6">
+        <nav className="hidden md:flex gap-4 lg:gap-6">
           <Link to="/" className="text-construction-primary font-medium hover:text-construction-accent transition">
             الرئيسية
           </Link>
@@ -153,7 +153,7 @@ const Header: React.FC = () => {
                 <Menu size={24} className="text-construction-accent" />
               </Button>
             </DrawerTrigger>
-            <DrawerContent className="h-[85vh]">
+            <DrawerContent className="h-[85vh] overflow-y-auto">
               <SidebarContent />
             </DrawerContent>
           </Drawer>
@@ -169,7 +169,7 @@ const Header: React.FC = () => {
                 <Menu size={24} className="text-construction-accent" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+            <SheetContent side="right" className="w-[280px] sm:w-[350px] overflow-y-auto">
               <SidebarContent />
             </SheetContent>
           </Sheet>
@@ -178,7 +178,7 @@ const Header: React.FC = () => {
       
       {/* Sidebar for desktop */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+        <SheetContent side="right" className="w-[280px] sm:w-[350px] overflow-y-auto">
           <SidebarContent />
         </SheetContent>
       </Sheet>
