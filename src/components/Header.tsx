@@ -1,35 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Menu, PanelLeft } from "lucide-react";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { Menu, PanelLeft, Phone, Mail, MapPin } from "lucide-react";
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -46,6 +28,11 @@ const Header: React.FC = () => {
     };
   }, []);
 
+  // إغلاق الشريط الجانبي عند تغيير المسار
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
   const navigationLinks = [
     { title: "الرئيسية", path: "/" },
     { title: "خدماتنا", path: "/services" },
@@ -58,17 +45,44 @@ const Header: React.FC = () => {
     { title: "إدارة المشاريع", path: "/project-management" },
   ];
 
+  const isActive = (path: string) => {
+    if (path === '/' && location.pathname === '/') return true;
+    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    return false;
+  };
+
   const SidebarContent = () => (
     <div className="flex flex-col gap-4 p-4 h-full bg-white overflow-y-auto max-h-full">
       <div className="text-2xl font-bold text-construction-primary mb-6 border-b pb-4">
         العزب <span className="text-construction-accent">للمقاولات</span>
       </div>
-      <div className="flex flex-col gap-2 overflow-y-auto">
+      
+      {/* معلومات الاتصال في الشريط الجانبي */}
+      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center gap-2 mb-2">
+          <Phone size={16} className="text-construction-primary" />
+          <a href="tel:+201062777333" className="text-sm">+2 010 6277 7333</a>
+        </div>
+        <div className="flex items-center gap-2 mb-2">
+          <Mail size={16} className="text-construction-primary" />
+          <a href="mailto:info@alazab.com" className="text-sm">info@alazab.com</a>
+        </div>
+        <div className="flex items-center gap-2">
+          <MapPin size={16} className="text-construction-primary" />
+          <span className="text-sm">القاهرة، مصر</span>
+        </div>
+      </div>
+      
+      <div className="flex flex-col gap-2 overflow-y-auto max-h-[calc(100vh-220px)]">
         {navigationLinks.map((link) => (
           <Link 
             key={link.path}
             to={link.path} 
-            className="text-construction-primary font-medium hover:text-construction-accent transition p-3 border-b"
+            className={`font-medium transition p-3 border-b ${
+              isActive(link.path) 
+                ? "text-construction-accent border-construction-accent" 
+                : "text-construction-primary hover:text-construction-accent"
+            }`}
             onClick={() => setSidebarOpen(false)}
           >
             {link.title}
@@ -100,7 +114,7 @@ const Header: React.FC = () => {
   );
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-white/80 backdrop-blur-md py-4'}`}>
       <div className="container mx-auto px-4 flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/" className="text-xl md:text-2xl font-bold text-construction-primary">
@@ -108,39 +122,51 @@ const Header: React.FC = () => {
           </Link>
         </div>
         
-        {/* Desktop Navigation */}
+        {/* شريط معلومات الاتصال العلوي للشاشات الكبيرة */}
+        <div className="hidden lg:flex items-center gap-6 absolute top-0 left-1/2 transform -translate-x-1/2 bg-construction-primary text-white px-6 py-1 rounded-b-lg">
+          <a href="tel:+201062777333" className="flex items-center gap-1 text-sm hover:text-construction-accent transition-colors">
+            <Phone size={14} />
+            <span>+2 010 6277 7333</span>
+          </a>
+          <a href="mailto:info@alazab.com" className="flex items-center gap-1 text-sm hover:text-construction-accent transition-colors">
+            <Mail size={14} />
+            <span>info@alazab.com</span>
+          </a>
+        </div>
+        
+        {/* قائمة التنقل للشاشات الكبيرة */}
         <nav className="hidden md:flex gap-4 lg:gap-6">
-          <Link to="/" className="text-construction-primary font-medium hover:text-construction-accent transition">
+          <Link to="/" className={`text-construction-primary font-medium hover:text-construction-accent transition ${isActive('/') && 'text-construction-accent'}`}>
             الرئيسية
           </Link>
-          <Link to="/services" className="text-construction-primary font-medium hover:text-construction-accent transition">
+          <Link to="/services" className={`text-construction-primary font-medium hover:text-construction-accent transition ${isActive('/services') && 'text-construction-accent'}`}>
             خدماتنا
           </Link>
-          <Link to="/projects" className="text-construction-primary font-medium hover:text-construction-accent transition">
+          <Link to="/projects" className={`text-construction-primary font-medium hover:text-construction-accent transition ${isActive('/projects') && 'text-construction-accent'}`}>
             المشاريع
           </Link>
-          <Link to="/about" className="text-construction-primary font-medium hover:text-construction-accent transition">
+          <Link to="/about" className={`text-construction-primary font-medium hover:text-construction-accent transition ${isActive('/about') && 'text-construction-accent'}`}>
             من نحن
           </Link>
-          <Link to="/contact" className="text-construction-primary font-medium hover:text-construction-accent transition">
+          <Link to="/contact" className={`text-construction-primary font-medium hover:text-construction-accent transition ${isActive('/contact') && 'text-construction-accent'}`}>
             اتصل بنا
           </Link>
         </nav>
         
-        {/* Sidebar Trigger Button */}
+        {/* زر الشريط الجانبي للشاشات الكبيرة */}
         <div className="hidden md:block">
           <Button 
             variant="outline"
             size="icon"
-            className="border-2 border-construction-accent"
+            className="border-2 border-construction-accent hover:bg-construction-accent hover:text-white transition-colors"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label="فتح القائمة الجانبية"
           >
-            <PanelLeft size={24} className="text-construction-accent" />
+            <PanelLeft size={24} className="text-construction-accent group-hover:text-white" />
           </Button>
         </div>
         
-        {/* Mobile Menu Button */}
+        {/* زر القائمة للأجهزة المحمولة */}
         {isMobile ? (
           <Drawer>
             <DrawerTrigger asChild>
@@ -176,7 +202,7 @@ const Header: React.FC = () => {
         )}
       </div>
       
-      {/* Sidebar for desktop */}
+      {/* شريط جانبي للشاشات الكبيرة */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="right" className="w-[280px] sm:w-[350px] overflow-y-auto">
           <SidebarContent />
