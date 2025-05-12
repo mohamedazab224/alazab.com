@@ -1,23 +1,31 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter, Clock, PieChart } from "lucide-react";
+import { Plus, Search, Filter, Clock, PieChart, Check, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import PageLayout from '../components/layout/PageLayout';
 import ProjectForm from '../components/project/ProjectForm';
 import ProjectList from '../components/project/ProjectList';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProjectStats {
   total: number;
   active: number;
   completed: number;
   upcoming: number;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  description: string;
+  status: 'جديد' | 'قيد التنفيذ' | 'مكتمل';
+  start_date: string;
+  end_date: string;
+  progress: number;
 }
 
 const ProjectManagement: React.FC = () => {
@@ -29,15 +37,19 @@ const ProjectManagement: React.FC = () => {
     completed: 0,
     upcoming: 0
   });
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   
-  // إحضار إحصائيات المشاريع
+  // Fetch project statistics
   useEffect(() => {
     const fetchProjectStats = async () => {
       try {
-        const { data: projects } = await supabase
+        setIsLoading(true);
+        const { data: projects, error } = await supabase
           .from('projects')
           .select('id, status, progress');
+          
+        if (error) throw error;
           
         if (projects) {
           const stats: ProjectStats = {
@@ -51,13 +63,19 @@ const ProjectManagement: React.FC = () => {
         }
       } catch (error) {
         console.error("Error fetching project stats:", error);
+        toast({
+          title: "خطأ في جلب البيانات",
+          description: "حدث خطأ أثناء محاولة جلب إحصائيات المشاريع",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
     
     fetchProjectStats();
-  }, []);
+  }, [toast]);
   
-  // إدارة نجاح إضافة مشروع جديد
   const handleProjectAdded = () => {
     setIsAddingProject(false);
     toast({
@@ -65,29 +83,41 @@ const ProjectManagement: React.FC = () => {
       description: "تمت إضافة المشروع الجديد وهو متاح الآن في قائمة المشاريع",
       duration: 5000,
     });
+    // Refresh stats after adding new project
+    setTimeout(() => window.location.reload(), 1000);
   };
   
   return (
     <PageLayout title="إدارة المشاريع">
-      {/* لوحة معلومات المشاريع */}
+      {/* Project Stats Dashboard */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-white border-l-4 border-l-construction-primary">
+        {/* Total Projects Card */}
+        <Card className="bg-white border-l-4 border-l-blue-600">
           <CardContent className="p-6 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">إجمالي المشاريع</p>
-              <h4 className="text-2xl font-bold text-construction-primary">{projectStats.total}</h4>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16 mt-2" />
+              ) : (
+                <h4 className="text-2xl font-bold text-blue-600">{projectStats.total}</h4>
+              )}
             </div>
             <div className="p-3 bg-blue-50 rounded-lg">
-              <PieChart size={24} className="text-construction-primary" />
+              <PieChart size={24} className="text-blue-600" />
             </div>
           </CardContent>
         </Card>
         
+        {/* Active Projects Card */}
         <Card className="bg-white border-l-4 border-l-yellow-500">
           <CardContent className="p-6 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">قيد التنفيذ</p>
-              <h4 className="text-2xl font-bold text-yellow-600">{projectStats.active}</h4>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16 mt-2" />
+              ) : (
+                <h4 className="text-2xl font-bold text-yellow-600">{projectStats.active}</h4>
+              )}
             </div>
             <div className="p-3 bg-yellow-50 rounded-lg">
               <Clock size={24} className="text-yellow-600" />
@@ -95,53 +125,58 @@ const ProjectManagement: React.FC = () => {
           </CardContent>
         </Card>
         
+        {/* Completed Projects Card */}
         <Card className="bg-white border-l-4 border-l-green-500">
           <CardContent className="p-6 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">مشاريع مكتملة</p>
-              <h4 className="text-2xl font-bold text-green-600">{projectStats.completed}</h4>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16 mt-2" />
+              ) : (
+                <h4 className="text-2xl font-bold text-green-600">{projectStats.completed}</h4>
+              )}
             </div>
             <div className="p-3 bg-green-50 rounded-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
+              <Check size={24} className="text-green-600" />
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-white border-l-4 border-l-blue-500">
+        {/* Upcoming Projects Card */}
+        <Card className="bg-white border-l-4 border-l-purple-500">
           <CardContent className="p-6 flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">مشاريع جديدة</p>
-              <h4 className="text-2xl font-bold text-blue-600">{projectStats.upcoming}</h4>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16 mt-2" />
+              ) : (
+                <h4 className="text-2xl font-bold text-purple-600">{projectStats.upcoming}</h4>
+              )}
             </div>
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <User size={24} className="text-purple-600" />
             </div>
           </CardContent>
         </Card>
       </div>
       
+      {/* Projects Header and Add Button */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-construction-primary">المشاريع الحالية</h2>
+          <h2 className="text-2xl font-bold text-gray-800">المشاريع الحالية</h2>
           <p className="text-gray-500">إدارة وتتبع جميع مشاريع الشركة</p>
         </div>
         <div className="flex gap-3">
           <Sheet open={isAddingProject} onOpenChange={setIsAddingProject}>
             <SheetTrigger asChild>
-              <Button className="bg-construction-primary hover:bg-construction-dark">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 <Plus className="ml-2" size={18} />
                 إضافة مشروع جديد
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-full sm:w-[540px] overflow-y-auto">
               <SheetHeader className="text-right">
-                <SheetTitle className="text-construction-primary text-2xl">إضافة مشروع جديد</SheetTitle>
+                <SheetTitle className="text-blue-600 text-2xl">إضافة مشروع جديد</SheetTitle>
                 <SheetDescription>
                   أدخل بيانات المشروع الجديد وانقر على حفظ عند الانتهاء
                 </SheetDescription>
@@ -154,7 +189,7 @@ const ProjectManagement: React.FC = () => {
         </div>
       </div>
       
-      {/* شريط البحث والفلترة */}
+      {/* Search and Filter Bar */}
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative w-full sm:w-96">
@@ -173,6 +208,7 @@ const ProjectManagement: React.FC = () => {
         </div>
       </div>
 
+      {/* Projects List */}
       <Card className="shadow-sm border-gray-200">
         <CardContent className="p-0">
           <ProjectList searchTerm={searchTerm} />
