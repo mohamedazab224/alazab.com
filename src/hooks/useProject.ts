@@ -2,19 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from "@/lib/supabase";
 import { useToast } from "./use-toast";
-
-export interface Project {
-  id: string;
-  name: string;
-  category?: string;
-  image?: string;
-  location?: string;
-  description?: string;
-  created_at: string;
-  status?: string;
-  progress?: number;
-  model3d_url?: string;
-}
+import { Project } from "@/types/project";
 
 export interface ProjectFile {
   id: string;
