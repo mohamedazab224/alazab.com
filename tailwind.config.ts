@@ -1,14 +1,15 @@
 
-import { type Config } from "tailwindcss";
+import type { Config } from "tailwindcss";
 
-export default {
+const config: Config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
+  prefix: "",
   theme: {
     container: {
       center: true,
@@ -24,14 +25,6 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        // تحديث الألوان المخصصة للبناء
-        construction: {
-          primary: "#008F8F", // الحفاظ على اللون الأصلي
-          secondary: "#E8AA33", // الحفاظ على اللون الأصلي
-          tertiary: "#333333",
-          accent: "#E8AA33",
-          dark: "#006666"
-        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -60,6 +53,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // نظام الألوان الجديد - الأزرق الداكن والأصفر
+        construction: {
+          primary: "#1e3a8a", // أزرق داكن
+          secondary: "#1e40af", // أزرق متوسط
+          accent: "#fbbf24", // أصفر ذهبي
+          dark: "#0f172a", // أزرق أسود
+          light: "#dbeafe", // أزرق فاتح
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -68,63 +69,43 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: '0' },
+          from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: '0' },
+          to: { height: "0" },
         },
-        "fade-in": {
-          "0%": {
-            opacity: "0",
-            transform: "translateY(10px)"
+        fadeInUp: {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(30px)'
           },
-          "100%": {
-            opacity: "1",
-            transform: "translateY(0)"
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0)'
           }
         },
-        "fade-out": {
-          "0%": {
-            opacity: "1",
-            transform: "translateY(0)"
+        slideInRight: {
+          '0%': {
+            opacity: '0',
+            transform: 'translateX(50px)'
           },
-          "100%": {
-            opacity: "0",
-            transform: "translateY(10px)"
+          '100%': {
+            opacity: '1',
+            transform: 'translateX(0)'
           }
-        },
-        "slide-up": {
-          "0%": {
-            opacity: "0",
-            transform: "translateY(20px)"
-          },
-          "100%": {
-            opacity: "1",
-            transform: "translateY(0)"
-          }
-        },
-        "slide-down": {
-          "0%": {
-            opacity: "1",
-            transform: "translateY(0)"
-          },
-          "100%": {
-            opacity: "0",
-            transform: "translateY(20px)"
-          }
-        },
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.3s ease-out",
-        "fade-out": "fade-out 0.3s ease-out",
-        "slide-up": "slide-up 0.3s ease-out",
-        "slide-down": "slide-down 0.3s ease-out",
+        "fade-in-up": "fadeInUp 0.8s ease-out",
+        "slide-in-right": "slideInRight 0.8s ease-out"
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+
+export default config;

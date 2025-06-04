@@ -348,6 +348,8 @@ export type Database = {
           actual_cost: number | null
           assigned_to: string | null
           attachments: string[] | null
+          building_type: string | null
+          category: string | null
           change_log: string | null
           completion_date: string | null
           created_at: string | null
@@ -357,6 +359,8 @@ export type Database = {
           estimated_cost: number | null
           id: string
           is_deleted: boolean | null
+          issue_type: string | null
+          location: string | null
           primary_service_id: string | null
           priority: string | null
           requester_email: string | null
@@ -366,6 +370,7 @@ export type Database = {
           service_type: string | null
           status: string | null
           store_id: string | null
+          technical_details: string | null
           title: string
           updated_at: string | null
           updated_by: string | null
@@ -374,6 +379,8 @@ export type Database = {
           actual_cost?: number | null
           assigned_to?: string | null
           attachments?: string[] | null
+          building_type?: string | null
+          category?: string | null
           change_log?: string | null
           completion_date?: string | null
           created_at?: string | null
@@ -383,6 +390,8 @@ export type Database = {
           estimated_cost?: number | null
           id?: string
           is_deleted?: boolean | null
+          issue_type?: string | null
+          location?: string | null
           primary_service_id?: string | null
           priority?: string | null
           requester_email?: string | null
@@ -392,6 +401,7 @@ export type Database = {
           service_type?: string | null
           status?: string | null
           store_id?: string | null
+          technical_details?: string | null
           title: string
           updated_at?: string | null
           updated_by?: string | null
@@ -400,6 +410,8 @@ export type Database = {
           actual_cost?: number | null
           assigned_to?: string | null
           attachments?: string[] | null
+          building_type?: string | null
+          category?: string | null
           change_log?: string | null
           completion_date?: string | null
           created_at?: string | null
@@ -409,6 +421,8 @@ export type Database = {
           estimated_cost?: number | null
           id?: string
           is_deleted?: boolean | null
+          issue_type?: string | null
+          location?: string | null
           primary_service_id?: string | null
           priority?: string | null
           requester_email?: string | null
@@ -418,6 +432,7 @@ export type Database = {
           service_type?: string | null
           status?: string | null
           store_id?: string | null
+          technical_details?: string | null
           title?: string
           updated_at?: string | null
           updated_by?: string | null

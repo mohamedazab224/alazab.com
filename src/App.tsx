@@ -8,6 +8,7 @@ import ServicesPage from "./pages/ServicesPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectManagement from "./pages/ProjectManagement";
 import ProjectDetails from "./pages/ProjectDetails";
+import ProjectPortfolioDetails from "./pages/ProjectPortfolioDetails";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,7 @@ function App() {
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/project-management" element={<ProjectManagement />} />
         <Route path="/projects/:projectId" element={<ProjectDetails />} />
+        <Route path="/portfolio/:projectId" element={<ProjectPortfolioDetails />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="*" element={<NotFound />} />
