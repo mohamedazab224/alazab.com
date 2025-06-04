@@ -9,6 +9,64 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          description: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          project_id: string | null
+          task_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          description: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          project_id?: string | null
+          task_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          project_id?: string | null
+          task_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_log_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_log_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "project_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignments: {
         Row: {
           assigned_at: string | null
@@ -780,6 +838,57 @@ export type Database = {
           },
         ]
       }
+      project_progress: {
+        Row: {
+          completed_tasks: number | null
+          created_at: string | null
+          date: string | null
+          id: string
+          notes: string | null
+          overall_progress: number | null
+          project_id: string
+          total_tasks: number | null
+          updated_by: string | null
+        }
+        Insert: {
+          completed_tasks?: number | null
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          notes?: string | null
+          overall_progress?: number | null
+          project_id: string
+          total_tasks?: number | null
+          updated_by?: string | null
+        }
+        Update: {
+          completed_tasks?: number | null
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          notes?: string | null
+          overall_progress?: number | null
+          project_id?: string
+          total_tasks?: number | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_progress_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_progress_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_tasks: {
         Row: {
           created_at: string | null
@@ -1171,15 +1280,50 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_project_progress: {
+        Args: { project_uuid: string }
+        Returns: number
+      }
+      check_overdue_tasks: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      create_notification: {
+        Args: {
+          user_uuid: string
+          project_uuid: string
+          task_uuid: string
+          notification_type: string
+          notification_title: string
+          notification_message: string
+        }
+        Returns: undefined
+      }
       create_profile: {
         Args:
           | { user_id: number; profile_data: Json }
           | { user_id: string; name: string; email: string }
         Returns: undefined
       }
+      get_daily_summary: {
+        Args: { report_date: string }
+        Returns: Json
+      }
       is_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      log_activity: {
+        Args: {
+          project_uuid: string
+          task_uuid: string
+          user_uuid: string
+          action_type: string
+          action_description: string
+          old_val?: string
+          new_val?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

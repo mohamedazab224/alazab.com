@@ -122,18 +122,6 @@ const Header: React.FC = () => {
           </Link>
         </div>
         
-        {/* شريط معلومات الاتصال العلوي للشاشات الكبيرة */}
-        <div className="hidden lg:flex items-center gap-6 absolute top-0 left-1/2 transform -translate-x-1/2 bg-construction-primary text-white px-6 py-1 rounded-b-lg">
-          <a href="tel:+201062777333" className="flex items-center gap-1 text-sm hover:text-construction-accent transition-colors">
-            <Phone size={14} />
-            <span>+2 010 6277 7333</span>
-          </a>
-          <a href="mailto:info@alazab.com" className="flex items-center gap-1 text-sm hover:text-construction-accent transition-colors">
-            <Mail size={14} />
-            <span>info@alazab.com</span>
-          </a>
-        </div>
-        
         {/* قائمة التنقل للشاشات الكبيرة */}
         <nav className="hidden md:flex gap-4 lg:gap-6">
           <Link to="/" className={`text-construction-primary font-medium hover:text-construction-accent transition ${isActive('/') && 'text-construction-accent'}`}>
