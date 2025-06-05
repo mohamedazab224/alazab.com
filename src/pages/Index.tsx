@@ -6,8 +6,6 @@ import Services from "../components/Services";
 import Projects from "../components/Projects";
 import About from "../components/About";
 import CompanyVision from "../components/CompanyVision";
-import CompanyLocations from "../components/CompanyLocations";
-import CompanyLinks from "../components/CompanyLinks";
 import Contact from "../components/Contact";
 import Footer from "../components/Footer";
 import { Button } from "@/components/ui/button";
@@ -65,8 +63,6 @@ const Index: React.FC = () => {
         <Projects />
         <About />
         <CompanyVision />
-        <CompanyLocations />
-        <CompanyLinks />
         <Contact />
       </main>
       <Footer />

@@ -11,42 +11,42 @@ const CompanyLinks: React.FC = () => {
       description: "تصفح منتجاتنا وخدماتنا",
       url: "https://alazab-co.daftra.com/",
       icon: Store,
-      color: "bg-green-500"
+      color: "bg-construction-accent"
     },
     {
       title: "فيس بوك",
       description: "تابعنا على فيس بوك",
       url: "https://www.facebook.com/alazab24",
       icon: ExternalLink,
-      color: "bg-blue-600"
+      color: "bg-construction-primary"
     },
     {
       title: "انستجرام",
       description: "شاهد أعمالنا على انستجرام",
       url: "https://www.instagram.com/alazab.co/",
       icon: ExternalLink,
-      color: "bg-pink-500"
+      color: "bg-construction-secondary"
     },
     {
       title: "يوتيوب",
       description: "قناتنا على يوتيوب",
       url: "https://www.youtube.com/@al-azab_co",
       icon: Youtube,
-      color: "bg-red-600"
+      color: "bg-construction-dark"
     },
     {
       title: "واتساب",
       description: "تواصل معنا عبر واتساب",
       url: "https://wa.me/c/201004006620",
       icon: ExternalLink,
-      color: "bg-green-600"
+      color: "bg-construction-accent"
     },
     {
       title: "خيوط (Threads)",
       description: "تابعنا على خيوط",
       url: "https://www.threads.com/@alazab.co",
       icon: ExternalLink,
-      color: "bg-gray-800"
+      color: "bg-construction-primary"
     }
   ];
 
@@ -75,7 +75,7 @@ const CompanyLinks: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">{link.description}</p>
-                <Button asChild className="w-full">
+                <Button asChild className="w-full bg-construction-primary hover:bg-construction-dark text-white">
                   <a 
                     href={link.url} 
                     target="_blank" 

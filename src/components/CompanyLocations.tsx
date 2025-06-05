@@ -26,20 +26,20 @@ const CompanyLocations: React.FC = () => {
   ];
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 bg-construction-primary">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-construction-primary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             مقراتنا وفروعنا
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-construction-light max-w-2xl mx-auto">
             نخدمكم من خلال مقراتنا في مصر والمملكة العربية السعودية
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {locations.map((location, index) => (
-            <Card key={index} className="overflow-hidden">
+            <Card key={index} className="overflow-hidden bg-white">
               <CardHeader className="pb-4">
                 <CardTitle className="text-xl text-construction-primary flex items-center gap-2">
                   <MapPin className="w-5 h-5" />
