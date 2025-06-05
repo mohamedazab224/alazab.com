@@ -11,6 +11,7 @@ import ProjectDetails from "./pages/ProjectDetails";
 import ProjectPortfolioDetails from "./pages/ProjectPortfolioDetails";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
+import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
@@ -20,6 +21,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<AuthPage />} />
         <Route path="/maintenance-request" element={<MaintenanceRequest />} />
         <Route path="/maintenance-tracking" element={<MaintenanceTracking />} />
         <Route path="/maintenance-list" element={<MaintenanceList />} />
