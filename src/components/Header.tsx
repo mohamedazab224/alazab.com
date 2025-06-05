@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Menu, PanelLeft, Phone, Mail, MapPin } from "lucide-react";
+import { Menu, PanelLeft, Phone, Mail, MapPin, User, LogIn } from "lucide-react";
+import { useAuth } from '@/hooks/useAuth';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -89,26 +92,69 @@ const Header: React.FC = () => {
           </Link>
         ))}
       </div>
-      <div className="mt-auto pt-4 border-t">
-        <div className="flex flex-wrap gap-4 justify-center">
-          <a href="https://www.facebook.com/Alazab.co" target="_blank" rel="noopener noreferrer" className="text-construction-primary hover:text-construction-accent">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-            </svg>
-          </a>
-          <a href="https://www.instagram.com/alazabcontracting/" target="_blank" rel="noopener noreferrer" className="text-construction-primary hover:text-construction-accent">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-            </svg>
-          </a>
-          <a href="https://wa.me/+201062777333" target="_blank" rel="noopener noreferrer" className="text-construction-primary hover:text-construction-accent">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-            </svg>
-          </a>
+
+      {/* قسم المصادقة */}
+      {user ? (
+        <div className="mt-auto pt-4 border-t">
+          <div className="flex items-center gap-3 mb-4">
+            <Avatar className="w-10 h-10">
+              <AvatarImage src="" />
+              <AvatarFallback className="bg-construction-primary text-white">
+                {user.email?.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-medium text-sm">{user.email}</p>
+              <p className="text-xs text-gray-500">مستخدم مسجل</p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Link 
+              to="/dashboard" 
+              className="text-construction-primary hover:text-construction-accent font-medium p-2 text-center border rounded"
+              onClick={() => setSidebarOpen(false)}
+            >
+              لوحة التحكم
+            </Link>
+            <Link 
+              to="/profile" 
+              className="text-construction-primary hover:text-construction-accent font-medium p-2 text-center border rounded"
+              onClick={() => setSidebarOpen(false)}
+            >
+              الملف الشخصي
+            </Link>
+          </div>
         </div>
+      ) : (
+        <div className="mt-auto pt-4 border-t">
+          <Link 
+            to="/auth" 
+            className="w-full bg-construction-primary text-white p-3 rounded-lg text-center font-medium hover:bg-construction-secondary transition-colors block"
+            onClick={() => setSidebarOpen(false)}
+          >
+            تسجيل الدخول
+          </Link>
+        </div>
+      )}
+      
+      <div className="flex flex-wrap gap-4 justify-center">
+        <a href="https://www.facebook.com/Alazab.co" target="_blank" rel="noopener noreferrer" className="text-construction-primary hover:text-construction-accent">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+          </svg>
+        </a>
+        <a href="https://www.instagram.com/alazabcontracting/" target="_blank" rel="noopener noreferrer" className="text-construction-primary hover:text-construction-accent">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+        </a>
+        <a href="https://wa.me/+201062777333" target="_blank" rel="noopener noreferrer" className="text-construction-primary hover:text-construction-accent">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+          </svg>
+        </a>
       </div>
     </div>
   );
@@ -141,8 +187,32 @@ const Header: React.FC = () => {
           </Link>
         </nav>
         
-        {/* زر الشريط الجانبي للشاشات الكبيرة */}
-        <div className="hidden md:block">
+        {/* أزرار المصادقة وزر الشريط الجانبي للشاشات الكبيرة */}
+        <div className="hidden md:flex items-center gap-3">
+          {user ? (
+            <div className="flex items-center gap-3">
+              <Link to="/dashboard">
+                <Avatar className="w-8 h-8 cursor-pointer">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="bg-construction-primary text-white">
+                    {user.email?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            </div>
+          ) : (
+            <Link to="/auth">
+              <Button 
+                variant="outline"
+                size="sm"
+                className="border-2 border-construction-primary hover:bg-construction-primary hover:text-white transition-colors"
+              >
+                <LogIn size={16} className="ml-2" />
+                تسجيل الدخول
+              </Button>
+            </Link>
+          )}
+          
           <Button 
             variant="outline"
             size="icon"

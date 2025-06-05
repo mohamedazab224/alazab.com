@@ -12,7 +12,11 @@ import ProjectPortfolioDetails from "./pages/ProjectPortfolioDetails";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import AuthPage from "./pages/AuthPage";
+import DashboardPage from "./pages/DashboardPage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
 
@@ -27,11 +31,34 @@ function App() {
         <Route path="/maintenance-list" element={<MaintenanceList />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
-        <Route path="/project-management" element={<ProjectManagement />} />
-        <Route path="/projects/:projectId" element={<ProjectDetails />} />
+        <Route path="/project-management" element={
+          <ProtectedRoute>
+            <ProjectManagement />
+          </ProtectedRoute>
+        } />
+        <Route path="/projects/:projectId" element={
+          <ProtectedRoute>
+            <ProjectDetails />
+          </ProtectedRoute>
+        } />
         <Route path="/portfolio/:projectId" element={<ProjectPortfolioDetails />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <SettingsPage />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
