@@ -22,7 +22,6 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -41,7 +40,6 @@ const bottomItems = [
 ];
 
 export function AppSidebar() {
-  const { collapsed } = useSidebar();
   const location = useLocation();
   const { user } = useAuth();
   
@@ -53,29 +51,22 @@ export function AppSidebar() {
       : "text-gray-700 hover:bg-gray-100";
 
   return (
-    <Sidebar className={collapsed ? "w-16" : "w-64"} collapsible>
+    <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
-        {!collapsed && (
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-construction-primary rounded-lg flex items-center justify-center">
-              <Wrench className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-construction-primary">العزب للمقاولات</h2>
-              <p className="text-sm text-gray-500">إدارة المشاريع</p>
-            </div>
-          </div>
-        )}
-        {collapsed && (
-          <div className="w-8 h-8 bg-construction-primary rounded-lg flex items-center justify-center mx-auto">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-construction-primary rounded-lg flex items-center justify-center">
             <Wrench className="w-4 h-4 text-white" />
           </div>
-        )}
+          <div>
+            <h2 className="text-lg font-bold text-construction-primary">العزب للمقاولات</h2>
+            <p className="text-sm text-gray-500">إدارة المشاريع</p>
+          </div>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className={collapsed ? "hidden" : "block"}>
+          <SidebarGroupLabel>
             القائمة الرئيسية
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -88,7 +79,7 @@ export function AppSidebar() {
                       className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${getNavClass(item.url)}`}
                     >
                       <item.icon className="w-5 h-5" />
-                      {!collapsed && <span>{item.title}</span>}
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -108,7 +99,7 @@ export function AppSidebar() {
                       className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${getNavClass(item.url)}`}
                     >
                       <item.icon className="w-5 h-5" />
-                      {!collapsed && <span>{item.title}</span>}
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -127,14 +118,12 @@ export function AppSidebar() {
                 {user.email?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            {!collapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user.email}
-                </p>
-                <p className="text-xs text-gray-500">مستخدم نشط</p>
-              </div>
-            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {user.email}
+              </p>
+              <p className="text-xs text-gray-500">مستخدم نشط</p>
+            </div>
           </div>
         )}
       </SidebarFooter>
