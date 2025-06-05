@@ -41,29 +41,30 @@ const Index: React.FC = () => {
   return (
     <div className="bg-white min-h-screen" dir="rtl">
       <Header />
-      <main>
+      <main className="space-y-0">
         <Hero />
         
         {/* زر طلب صيانة */}
-        <div className="container mx-auto px-4 py-8 text-center">
-          <Button 
-            className="bg-construction-accent hover:bg-construction-accent/90 text-white py-3 px-6 rounded-md text-lg"
-            asChild
-          >
-            <Link to="/maintenance-request">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-              </svg>
-              تقديم طلب صيانة
-            </Link>
-          </Button>
-        </div>
+        <section className="py-12 bg-gray-50">
+          <div className="container mx-auto px-4 text-center">
+            <Button 
+              className="bg-construction-accent hover:bg-construction-accent/90 text-white py-3 px-6 rounded-md text-lg"
+              asChild
+            >
+              <Link to="/maintenance-request">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                </svg>
+                تقديم طلب صيانة
+              </Link>
+            </Button>
+          </div>
+        </section>
         
         <Services />
         <Projects />
         <About />
         <CompanyVision />
-        <Contact />
       </main>
       <Footer />
     </div>

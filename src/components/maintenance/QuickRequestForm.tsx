@@ -67,7 +67,7 @@ const QuickRequestForm: React.FC = () => {
 
       // إنشاء رقم طلب فريد
       const uniqueId = Date.now().toString().slice(-6);
-      const reqNumber = `MR-${uniqueId}`;
+      const reqNumber = `QMR-${uniqueId}`;
       
       // بحث عن معرّف الفرع المحدد
       const { data: storeData, error: storeError } = await supabase
@@ -86,7 +86,7 @@ const QuickRequestForm: React.FC = () => {
         ? parseFloat(formData.estimatedCost)
         : null;
       
-      // حفظ المعلومات في قاعدة البيانات مع تعطيل RLS مؤقتاً
+      // حفظ المعلومات في قاعدة البيانات
       const requestData: MaintenanceRequestDB = {
         title: formData.title,
         service_type: formData.serviceType,
@@ -97,7 +97,7 @@ const QuickRequestForm: React.FC = () => {
         status: 'pending',
         store_id: storeId,
         created_at: new Date().toISOString(),
-        created_by: 'anonymous' // إضافة مستخدم افتراضي
+        created_by: 'anonymous'
       };
         
       const { data: insertedRequest, error: dbError } = await supabase
@@ -107,8 +107,7 @@ const QuickRequestForm: React.FC = () => {
         
       if (dbError) {
         console.error('خطأ في حفظ بيانات الطلب:', dbError);
-        // في حالة فشل قاعدة البيانات، نستخدم رقم الطلب المولد محلياً
-        console.log('استخدام رقم الطلب المحلي:', reqNumber);
+        throw new Error('فشل في حفظ الطلب');
       }
       
       const requestId = insertedRequest && insertedRequest[0] ? insertedRequest[0].id : reqNumber;
@@ -116,7 +115,7 @@ const QuickRequestForm: React.FC = () => {
       // رفع المرفقات إلى Supabase Storage (إذا وجدت)
       if (formData.attachments.length > 0) {
         const uploadPromises = formData.attachments.map(async (file) => {
-          const fileName = `${requestId}-${file.name}`;
+          const fileName = `${requestId}-${Date.now()}-${file.name}`;
           const { data, error } = await supabase.storage
             .from('maintenance-attachments')
             .upload(fileName, file);
@@ -135,13 +134,13 @@ const QuickRequestForm: React.FC = () => {
         });
         
         const uploadedFiles = await Promise.all(uploadPromises);
-        const fileUrls = uploadedFiles.filter(Boolean).map(file => file?.url);
+        const validFiles = uploadedFiles.filter(Boolean);
         
         // إضافة المرفقات إلى جدول المرفقات إذا وجدت
-        if (fileUrls.length > 0) {
-          const attachmentsData: AttachmentDB[] = fileUrls.map((url) => ({
+        if (validFiles.length > 0) {
+          const attachmentsData: AttachmentDB[] = validFiles.map((file) => ({
             request_id: requestId,
-            file_url: url || '',
+            file_url: file?.url || '',
             description: `مرفق للطلب ${formData.title}`,
             uploaded_at: new Date().toISOString()
           }));
@@ -163,7 +162,9 @@ const QuickRequestForm: React.FC = () => {
         service_type: formData.serviceType,
         title: formData.title,
         description: formData.description,
-        priority: formData.priority,
+        priority: formData.priority === 'low' ? 'منخفضة' : 
+                  formData.priority === 'medium' ? 'متوسطة' : 
+                  formData.priority === 'high' ? 'عالية' : 'حرجة',
         requested_date: new Date(formData.requestedDate).toLocaleDateString('ar-SA'),
         estimated_cost: formData.estimatedCost || 'غير محدد',
         attachments_count: formData.attachments.length
@@ -179,6 +180,18 @@ const QuickRequestForm: React.FC = () => {
         title: "تم إرسال الطلب بنجاح",
         description: `تم إنشاء طلب الصيانة برقم ${requestId}`,
         variant: "default",
+      });
+      
+      // إعادة تعيين النموذج
+      setFormData({
+        branch: '',
+        serviceType: '',
+        title: '',
+        description: '',
+        priority: 'medium',
+        requestedDate: new Date().toISOString().split('T')[0],
+        estimatedCost: '',
+        attachments: []
       });
       
       // انتقال إلى صفحة متابعة الطلب
@@ -197,7 +210,7 @@ const QuickRequestForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="branch">اختر الفرع *</Label>
@@ -210,11 +223,9 @@ const QuickRequestForm: React.FC = () => {
               <SelectValue placeholder="اختر الفرع" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="الرياض الرئيسي">الرياض الرئيسي</SelectItem>
-              <SelectItem value="الرياض الشمالي">الرياض الشمالي</SelectItem>
-              <SelectItem value="الرياض الجنوبي">الرياض الجنوبي</SelectItem>
-              <SelectItem value="جدة">جدة</SelectItem>
-              <SelectItem value="الدمام">الدمام</SelectItem>
+              <SelectItem value="المقر الرئيسي - القاهرة">المقر الرئيسي - القاهرة</SelectItem>
+              <SelectItem value="فرع الدقهلية - نبروه">فرع الدقهلية - نبروه</SelectItem>
+              <SelectItem value="فرع المملكة العربية السعودية - جدة">فرع المملكة العربية السعودية - جدة</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -266,7 +277,7 @@ const QuickRequestForm: React.FC = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="priority">الأولوية</Label>
           <Select
@@ -286,16 +297,48 @@ const QuickRequestForm: React.FC = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="attachment">إرفاق ملفات</Label>
+          <Label htmlFor="requestedDate">التاريخ المطلوب</Label>
           <Input
-            id="attachment"
-            type="file"
-            onChange={handleFileChange}
-            multiple
-            className="cursor-pointer"
+            id="requestedDate"
+            name="requestedDate"
+            type="date"
+            value={formData.requestedDate}
+            onChange={handleChange}
+            min={new Date().toISOString().split('T')[0]}
           />
-          <p className="text-xs text-muted-foreground">يمكنك إرفاق صور أو مستندات متعلقة بالطلب</p>
         </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="estimatedCost">التكلفة المتوقعة (ريال)</Label>
+          <Input
+            id="estimatedCost"
+            name="estimatedCost"
+            type="number"
+            value={formData.estimatedCost}
+            onChange={handleChange}
+            placeholder="اختياري"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="attachment">إرفاق ملفات</Label>
+        <Input
+          id="attachment"
+          type="file"
+          onChange={handleFileChange}
+          multiple
+          accept="image/*,application/pdf,.doc,.docx"
+          className="cursor-pointer"
+        />
+        <p className="text-xs text-muted-foreground">
+          يمكنك إرفاق صور أو مستندات متعلقة بالطلب (الحد الأقصى: 5 ملفات)
+        </p>
+        {formData.attachments.length > 0 && (
+          <div className="text-sm text-green-600">
+            تم اختيار {formData.attachments.length} ملف(ات)
+          </div>
+        )}
       </div>
 
       <div className="pt-4">
@@ -304,7 +347,7 @@ const QuickRequestForm: React.FC = () => {
           className="w-full bg-construction-primary hover:bg-construction-primary/90"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "جاري الإرسال..." : "إرسال الطلب"}
+          {isSubmitting ? "جاري الإرسال..." : "إرسال الطلب السريع"}
         </Button>
       </div>
     </form>

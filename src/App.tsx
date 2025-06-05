@@ -12,6 +12,7 @@ import ProjectDetails from "./pages/ProjectDetails";
 import ProjectPortfolioDetails from "./pages/ProjectPortfolioDetails";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
+import CEOPage from "./pages/CEOPage";
 import AuthPage from "./pages/AuthPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -45,6 +46,7 @@ function App() {
         <Route path="/portfolio/:projectId" element={<ProjectPortfolioDetails />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/ceo" element={<CEOPage />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <DashboardPage />
