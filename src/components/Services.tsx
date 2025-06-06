@@ -45,12 +45,12 @@ const Services: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (
             <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <CardHeader>
+              <CardHeader className="text-center">
                 <div className="text-4xl mb-4">{service.icon}</div>
-                <CardTitle className="text-xl text-construction-primary">{service.title}</CardTitle>
+                <CardTitle className="card-title">{service.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-gray-600">{service.description}</CardDescription>
+                <CardDescription className="card-content">{service.description}</CardDescription>
               </CardContent>
             </Card>
           ))}

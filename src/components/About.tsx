@@ -37,8 +37,8 @@ const About: React.FC = () => {
   ];
 
   return (
-    <section id="about" className="py-16 bg-construction-light">
-      <div className="container mx-auto px-4">
+    <section id="about" className="section bg-construction-light">
+      <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
           {/* About Image */}
           <div className="relative">
@@ -56,14 +56,14 @@ const About: React.FC = () => {
             <div className="inline-block bg-construction-accent/20 text-construction-accent px-3 py-1 rounded-full text-sm font-medium mb-4">
               من نحن
             </div>
-            <h2 className="text-3xl lg:text-4xl font-bold mb-6">
+            <h2 className="text-2xl lg:text-3xl font-bold mb-6">
               شركة العزب للمقاولات <br />
               <span className="text-construction-accent">تاريخ من التميز والإبداع</span>
             </h2>
-            <p className="text-gray-600 mb-6 leading-relaxed">
+            <p className="text-base text-gray-600 mb-6 leading-relaxed">
               تأسست شركة العزب للمقاولات منذ أكثر من 20 عاماً لتصبح واحدة من أهم الشركات الرائدة في مجال المقاولات والبناء في المملكة العربية السعودية ومصر. تخصصنا في تقديم خدمات متكاملة في مجال الإنشاء والتعمير بأعلى معايير الجودة والالتزام بالمواعيد.
             </p>
-            <p className="text-gray-600 mb-8 leading-relaxed">
+            <p className="text-base text-gray-600 mb-8 leading-relaxed">
               نعمل بشغف لتحويل أفكار عملائنا إلى واقع ملموس، مع التركيز على الاستدامة والابتكار في جميع مشاريعنا. فريقنا المكون من مهندسين وخبراء متخصصين يعملون معاً لتقديم أفضل الحلول الهندسية والإنشائية.
             </p>
             
@@ -78,10 +78,10 @@ const About: React.FC = () => {
           {achievements.map((achievement, index) => (
             <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow">
               <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-construction-primary mb-2">
+                <div className="text-2xl md:text-3xl font-bold text-construction-primary mb-2">
                   {achievement.number}
                 </div>
-                <div className="text-gray-600 font-medium">
+                <div className="text-sm md:text-base text-gray-600 font-medium">
                   {achievement.label}
                 </div>
               </CardContent>
@@ -91,8 +91,8 @@ const About: React.FC = () => {
 
         {/* قيمنا الأساسية */}
         <div className="text-center mb-12">
-          <h3 className="text-3xl font-bold text-construction-primary mb-4">قيمنا الأساسية</h3>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <h3 className="section-title">قيمنا الأساسية</h3>
+          <p className="section-subtitle">
             نؤمن بمجموعة من القيم الأساسية التي توجه عملنا وتضمن تحقيق أهدافنا ورضا عملائنا
           </p>
         </div>
@@ -101,11 +101,11 @@ const About: React.FC = () => {
           {values.map((value, index) => (
             <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow">
               <CardContent className="pt-6">
-                <div className="text-4xl mb-4">{value.icon}</div>
-                <h4 className="font-bold text-lg mb-3 text-construction-primary">
+                <div className="text-3xl mb-4">{value.icon}</div>
+                <h4 className="card-title text-lg mb-3">
                   {value.title}
                 </h4>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="card-content text-sm">
                   {value.description}
                 </p>
               </CardContent>
@@ -116,10 +116,10 @@ const About: React.FC = () => {
         {/* شهادات الجودة */}
         <div className="bg-white rounded-lg p-8 shadow-lg">
           <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-construction-primary mb-4">
+            <h3 className="text-xl md:text-2xl font-bold text-construction-primary mb-4">
               شهادات الجودة والاعتمادات
             </h3>
-            <p className="text-gray-600">
+            <p className="text-base text-gray-600">
               حاصلون على شهادات الجودة العالمية والاعتمادات المحلية
             </p>
           </div>

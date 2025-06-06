@@ -34,6 +34,39 @@ input[type="tel"] {
   text-align: left;
 }
 
+/* Typography Hierarchy */
+@layer components {
+  /* Section Titles - العناوين الرئيسية للأقسام */
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-construction-primary text-center mb-4;
+  }
+  
+  /* Section Subtitles - العناوين الفرعية للأقسام */
+  .section-subtitle {
+    @apply text-lg md:text-xl text-gray-600 text-center mb-8 max-w-2xl mx-auto;
+  }
+  
+  /* Card Titles - عناوين البطاقات */
+  .card-title {
+    @apply text-xl md:text-2xl font-bold text-construction-primary mb-3;
+  }
+  
+  /* Card Content - محتوى البطاقات */
+  .card-content {
+    @apply text-base text-gray-600 leading-relaxed;
+  }
+  
+  /* Section Container */
+  .section {
+    @apply py-16 px-4;
+  }
+  
+  /* Container */
+  .container {
+    @apply max-w-7xl mx-auto;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
