@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import PageLayout from "../components/layout/PageLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Mail, Phone, Building, Award, Users, Target } from 'lucide-react';
+import { Mail, Building, Award, Users, Target } from 'lucide-react';
 
 const CEOPage: React.FC = () => {
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
@@ -242,7 +241,7 @@ const CEOPage: React.FC = () => {
 
         {/* Footer */}
         <div className="mt-12 p-6 bg-gray-100 rounded-lg text-xs text-gray-600 leading-relaxed">
-          <strong>شركة العزب للإنشاءات</strong> شركة تابعة للعلامة التجارية المسجلة D-U-N-S No: 849203826، تعمل تحت الاسم التجاري القانوني {عزب لأعمال الإدارة التنفيذية للمشاريع الصناعية والخدمية والتوريدات العامة}. 
+          <strong>شركة العزب للإنشاءات</strong> شركة تابعة للعلامة التجارية المسجلة D-U-N-S No: 849203826، تعمل تحت الاسم التجاري القانوني "عزب لأعمال الإدارة التنفيذية للمشاريع الصناعية والخدمية والتوريدات العامة". 
           تم إنتاج وتوزيع هذه الرسالة من قبل <strong>شركة العزب</strong> المكتب الرئيسي، العنوان: 8/500 شارع المعادي، القاهرة، مصر الرمز البريدي: 4234570 البريد الإلكتروني: support@al-azab.co الهاتف: 0227047955 الضريبة: 577219804 السجل التجاري: 218670 | 
           شركة العزب للإنشاءات المحدودة أو الشركات التابعة لها. جميع الحقوق محفوظة. اقرأ إشعار الخصوصية الخاص بنا &copy; 2023.
         </div>
