@@ -72,7 +72,7 @@ const CEOPage: React.FC = () => {
     <PageLayout>
       <div className={language === 'ar' ? 'arabic-text' : 'english-text'}>
         {/* Header with company logos */}
-        <div className="bg-construction-primary text-white p-6 rounded-lg mb-8 flex justify-between items-center">
+        <div className="bg-amber-600 text-white p-6 rounded-lg mb-8 flex justify-between items-center">
           <img 
             src="https://i.postimg.cc/sXVzB4MW/60-200PX.png" 
             alt="Al-azab Logo English" 
@@ -85,44 +85,48 @@ const CEOPage: React.FC = () => {
           />
         </div>
 
-        {/* Language Switch */}
-        <div className="text-center mb-8">
-          <div className="inline-flex rounded-lg border border-gray-200 p-1">
-            <Button
-              variant={language === 'ar' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setLanguage('ar')}
-              className="rounded-md"
-            >
-              العربية
-            </Button>
-            <Button
-              variant={language === 'en' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setLanguage('en')}
-              className="rounded-md"
-            >
-              English
-            </Button>
+        {/* CEO Photo and Basic Info with Language Switch on opposite side */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+          {/* Language Switch - positioned on the left/right opposite to image */}
+          <div className="lg:col-span-1 order-first lg:order-last">
+            <div className="text-center mb-6">
+              <div className="inline-flex rounded-lg border border-gray-200 p-1">
+                <Button
+                  variant={language === 'ar' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setLanguage('ar')}
+                  className="rounded-md bg-amber-600 hover:bg-amber-700"
+                >
+                  العربية
+                </Button>
+                <Button
+                  variant={language === 'en' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setLanguage('en')}
+                  className="rounded-md bg-amber-600 hover:bg-amber-700"
+                >
+                  English
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* CEO Photo and Basic Info */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          <div className="lg:col-span-1">
+          {/* CEO Photo - smaller size */}
+          <div className="lg:col-span-1 order-2 lg:order-first">
             <Card className="overflow-hidden">
               <CardContent className="p-0">
                 <img 
                   src="https://i.postimg.cc/8JTMcdcN/M-Azab.png" 
                   alt="Mohamed Azab" 
-                  className="w-full h-auto"
+                  className="w-full h-64 object-cover"
                 />
               </CardContent>
             </Card>
           </div>
           
-          <div className="lg:col-span-2">
-            <h1 className="text-4xl font-bold text-construction-primary mb-4">
+          {/* CEO Info */}
+          <div className="lg:col-span-2 order-3">
+            <h1 className="text-4xl font-bold text-amber-700 mb-4">
               {currentContent.title}
             </h1>
             <h2 className="text-xl text-gray-600 mb-6">
@@ -137,7 +141,7 @@ const CEOPage: React.FC = () => {
         {/* Academic Background */}
         <Card className="mb-8">
           <CardContent className="p-8">
-            <h3 className="text-2xl font-bold text-construction-primary mb-4 flex items-center gap-2">
+            <h3 className="text-2xl font-bold text-amber-700 mb-4 flex items-center gap-2">
               <Award className="w-6 h-6" />
               {currentContent.backgroundTitle}
             </h3>
@@ -150,7 +154,7 @@ const CEOPage: React.FC = () => {
         {/* Vision and Mission */}
         <Card className="mb-8">
           <CardContent className="p-8">
-            <h3 className="text-2xl font-bold text-construction-primary mb-4 flex items-center gap-2">
+            <h3 className="text-2xl font-bold text-amber-700 mb-4 flex items-center gap-2">
               <Target className="w-6 h-6" />
               {currentContent.visionTitle}
             </h3>
@@ -163,7 +167,7 @@ const CEOPage: React.FC = () => {
         {/* Achievements */}
         <Card className="mb-8">
           <CardContent className="p-8">
-            <h3 className="text-2xl font-bold text-construction-primary mb-4">
+            <h3 className="text-2xl font-bold text-amber-700 mb-4">
               {currentContent.achievementsTitle}
             </h3>
             <p className="text-gray-700 leading-relaxed">
@@ -174,7 +178,7 @@ const CEOPage: React.FC = () => {
 
         {/* Core Values */}
         <div className="mb-8">
-          <h3 className="text-2xl font-bold text-construction-primary mb-6 text-center">
+          <h3 className="text-2xl font-bold text-amber-700 mb-6 text-center">
             {currentContent.valuesTitle}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -185,11 +189,11 @@ const CEOPage: React.FC = () => {
                 <Card key={index} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className="bg-construction-primary/10 p-3 rounded-full">
-                        <ValueIcon className="w-6 h-6 text-construction-primary" />
+                      <div className="bg-amber-100 p-3 rounded-full">
+                        <ValueIcon className="w-6 h-6 text-amber-700" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-lg mb-2 text-construction-primary">
+                        <h4 className="font-bold text-lg mb-2 text-amber-700">
                           {valueContent.title}
                         </h4>
                         <p className="text-gray-600 text-sm leading-relaxed">
@@ -205,7 +209,7 @@ const CEOPage: React.FC = () => {
         </div>
 
         {/* CEO Message */}
-        <Card className="mb-8 bg-gradient-to-r from-construction-primary to-construction-secondary text-white">
+        <Card className="mb-8 bg-gradient-to-r from-amber-600 to-orange-600 text-white">
           <CardContent className="p-8">
             <h3 className="text-2xl font-bold mb-4">
               {currentContent.messageTitle}
@@ -213,7 +217,7 @@ const CEOPage: React.FC = () => {
             <p className="leading-relaxed text-lg mb-4">
               "{currentContent.messageText}"
             </p>
-            <p className="italic text-construction-accent font-medium">
+            <p className="italic text-yellow-200 font-medium">
               "{currentContent.quote}"
             </p>
           </CardContent>
@@ -222,15 +226,15 @@ const CEOPage: React.FC = () => {
         {/* Contact Information */}
         <Card>
           <CardContent className="p-8">
-            <h3 className="text-2xl font-bold text-construction-primary mb-6">
+            <h3 className="text-2xl font-bold text-amber-700 mb-6">
               {currentContent.contactTitle}
             </h3>
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-construction-primary" />
+                <Mail className="w-5 h-5 text-amber-700" />
                 <a 
                   href="mailto:mohamed@al-azab.co" 
-                  className="text-construction-primary hover:underline"
+                  className="text-amber-700 hover:underline"
                 >
                   mohamed@al-azab.co
                 </a>
