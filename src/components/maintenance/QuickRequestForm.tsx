@@ -1,12 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
-import { MaintenanceRequest, MaintenanceRequestDB, AttachmentDB } from '@/types/maintenance';
+import { Loader2 } from 'lucide-react';
+import { MaintenanceRequest, MaintenanceRequestDB, AttachmentDB, BranchData, ServiceTypeData } from '@/types/maintenance';
 import { sendEmail } from '@/lib/emailjs';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +15,9 @@ import { useNavigate } from 'react-router-dom';
 const QuickRequestForm: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [branches, setBranches] = useState<BranchData[]>([]);
+  const [serviceTypes, setServiceTypes] = useState<ServiceTypeData[]>([]);
   const [formData, setFormData] = useState<MaintenanceRequest>({
     branch: '',
     serviceType: '',
@@ -24,6 +28,67 @@ const QuickRequestForm: React.FC = () => {
     estimatedCost: '',
     attachments: []
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // جلب بيانات الفروع
+        const { data: storesData, error: storesError } = await supabase
+          .from('stores')
+          .select('id, name')
+          .eq('is_deleted', false);
+        
+        if (storesError) throw storesError;
+        
+        // جلب أنواع خدمات الصيانة
+        const { data: servicesData, error: servicesError } = await supabase
+          .from('maintenance_services')
+          .select('id, name, description')
+          .eq('is_active', true)
+          .eq('is_deleted', false);
+        
+        if (servicesError) throw servicesError;
+        
+        setBranches(storesData || []);
+        setServiceTypes(servicesData || []);
+
+        console.log('تم تحميل البيانات بنجاح:', { 
+          branches: storesData?.length, 
+          services: servicesData?.length 
+        });
+      } catch (error) {
+        console.error('خطأ في جلب البيانات:', error);
+        toast({
+          title: "خطأ في تحميل البيانات",
+          description: "سيتم استخدام البيانات الافتراضية",
+          variant: "destructive",
+        });
+        // في حالة حدوث خطأ، استخدام البيانات الافتراضية
+        setBranches([
+          { id: "1", name: "الرياض" },
+          { id: "2", name: "جدة" },
+          { id: "3", name: "مكة" },
+          { id: "4", name: "المدينة" },
+          { id: "5", name: "الدمام" },
+          { id: "6", name: "الخبر" }
+        ]);
+        
+        setServiceTypes([
+          { id: "1", name: "صيانة عامة" },
+          { id: "2", name: "صيانة كهربائية" },
+          { id: "3", name: "صيانة سباكة" },
+          { id: "4", name: "صيانة تكييف" },
+          { id: "5", name: "صيانة أجهزة" },
+          { id: "6", name: "أخرى" }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -209,6 +274,15 @@ const QuickRequestForm: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-60">
+        <Loader2 className="h-8 w-8 animate-spin text-construction-primary" />
+        <span className="mr-2">جاري تحميل البيانات...</span>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -223,9 +297,11 @@ const QuickRequestForm: React.FC = () => {
               <SelectValue placeholder="اختر الفرع" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="المقر الرئيسي - القاهرة">المقر الرئيسي - القاهرة</SelectItem>
-              <SelectItem value="فرع الدقهلية - نبروه">فرع الدقهلية - نبروه</SelectItem>
-              <SelectItem value="فرع المملكة العربية السعودية - جدة">فرع المملكة العربية السعودية - جدة</SelectItem>
+              {branches.map((branch) => (
+                <SelectItem key={branch.id} value={branch.name}>
+                  {branch.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -241,12 +317,11 @@ const QuickRequestForm: React.FC = () => {
               <SelectValue placeholder="اختر نوع الخدمة" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="كهرباء">كهرباء</SelectItem>
-              <SelectItem value="سباكة">سباكة</SelectItem>
-              <SelectItem value="تكييف">تكييف</SelectItem>
-              <SelectItem value="نجارة">نجارة</SelectItem>
-              <SelectItem value="دهان">دهان</SelectItem>
-              <SelectItem value="أخرى">أخرى</SelectItem>
+              {serviceTypes.map((service) => (
+                <SelectItem key={service.id} value={service.name}>
+                  {service.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -345,9 +420,16 @@ const QuickRequestForm: React.FC = () => {
         <Button 
           type="submit" 
           className="w-full bg-construction-primary hover:bg-construction-primary/90"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isLoading}
         >
-          {isSubmitting ? "جاري الإرسال..." : "إرسال الطلب السريع"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              جاري الإرسال...
+            </>
+          ) : (
+            "إرسال الطلب السريع"
+          )}
         </Button>
       </div>
     </form>
