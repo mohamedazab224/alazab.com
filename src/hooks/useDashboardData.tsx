@@ -9,7 +9,11 @@ interface Project {
   status: string;
   location: string;
   created_at: string;
-  updated_at?: string;
+}
+
+interface MaintenanceRequest {
+  id: string;
+  status: string;
 }
 
 interface DashboardData {
@@ -36,30 +40,35 @@ export const useDashboardData = () => {
         setIsLoading(true);
 
         // جلب بيانات المشاريع
-        const { data: projects, error: projectsError } = await supabase
+        const { data: projectsData, error: projectsError } = await supabase
           .from('projects')
           .select('id, name, status, location, created_at')
-          .eq('is_deleted', false);
+          .eq('is_deleted', false)
+          .returns<Project[]>();
 
         if (projectsError) throw projectsError;
 
         // جلب بيانات طلبات الصيانة
-        const { data: maintenance, error: maintenanceError } = await supabase
+        const { data: maintenanceData, error: maintenanceError } = await supabase
           .from('maintenance_requests')
-          .select('id, status');
+          .select('id, status')
+          .returns<MaintenanceRequest[]>();
 
         if (maintenanceError) throw maintenanceError;
 
+        const projects = projectsData || [];
+        const maintenance = maintenanceData || [];
+
         // حساب الإحصائيات
-        const totalProjects = projects?.length || 0;
-        const activeProjects = projects?.filter(p => p.status === 'active').length || 0;
-        const pendingMaintenance = maintenance?.filter(m => m.status === 'pending').length || 0;
-        const completedTasks = maintenance?.filter(m => m.status === 'completed').length || 0;
+        const totalProjects = projects.length;
+        const activeProjects = projects.filter(p => p.status === 'active').length;
+        const pendingMaintenance = maintenance.filter(m => m.status === 'pending').length;
+        const completedTasks = maintenance.filter(m => m.status === 'completed').length;
 
         // آخر المشاريع (أحدث 5 مشاريع)
         const recentProjects = projects
-          ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          ?.slice(0, 5) || [];
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 5);
 
         setData({
           totalProjects,
