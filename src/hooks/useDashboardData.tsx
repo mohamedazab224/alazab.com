@@ -40,22 +40,21 @@ export const useDashboardData = () => {
         setIsLoading(true);
 
         // جلب بيانات المشاريع
-        const { data: projectsData, error: projectsError } = await supabase
+        const projectsQuery = await supabase
           .from('projects')
-          .select('id, name, status, location, created_at')
-          .eq('is_deleted', false);
+          .select('id, name, status, location, created_at');
 
-        if (projectsError) throw projectsError;
+        if (projectsQuery.error) throw projectsQuery.error;
 
         // جلب بيانات طلبات الصيانة
-        const { data: maintenanceData, error: maintenanceError } = await supabase
+        const maintenanceQuery = await supabase
           .from('maintenance_requests')
           .select('id, status');
 
-        if (maintenanceError) throw maintenanceError;
+        if (maintenanceQuery.error) throw maintenanceQuery.error;
 
-        const projects = (projectsData as Project[]) || [];
-        const maintenance = (maintenanceData as MaintenanceRequest[]) || [];
+        const projects = (projectsQuery.data as Project[]) || [];
+        const maintenance = (maintenanceQuery.data as MaintenanceRequest[]) || [];
 
         // حساب الإحصائيات
         const totalProjects = projects.length;
