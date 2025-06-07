@@ -43,21 +43,19 @@ export const useDashboardData = () => {
         const { data: projectsData, error: projectsError } = await supabase
           .from('projects')
           .select('id, name, status, location, created_at')
-          .eq('is_deleted', false)
-          .returns<Project[]>();
+          .eq('is_deleted', false);
 
         if (projectsError) throw projectsError;
 
         // جلب بيانات طلبات الصيانة
         const { data: maintenanceData, error: maintenanceError } = await supabase
           .from('maintenance_requests')
-          .select('id, status')
-          .returns<MaintenanceRequest[]>();
+          .select('id, status');
 
         if (maintenanceError) throw maintenanceError;
 
-        const projects = projectsData || [];
-        const maintenance = maintenanceData || [];
+        const projects = (projectsData as Project[]) || [];
+        const maintenance = (maintenanceData as MaintenanceRequest[]) || [];
 
         // حساب الإحصائيات
         const totalProjects = projects.length;
