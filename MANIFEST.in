@@ -1,0 +1,19 @@
+
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include azab_template_refinement *.css
+recursive-include azab_template_refinement *.csv
+recursive-include azab_template_refinement *.html
+recursive-include azab_template_refinement *.ico
+recursive-include azab_template_refinement *.js
+recursive-include azab_template_refinement *.json
+recursive-include azab_template_refinement *.md
+recursive-include azab_template_refinement *.png
+recursive-include azab_template_refinement *.py
+recursive-include azab_template_refinement *.svg
+recursive-include azab_template_refinement *.txt
+recursive-exclude azab_template_refinement *.pyc
