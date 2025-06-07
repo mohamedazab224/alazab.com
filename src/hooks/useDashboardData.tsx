@@ -3,12 +3,21 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/components/ui/use-toast";
 
+interface Project {
+  id: string;
+  name: string;
+  status: string;
+  location: string;
+  created_at: string;
+  updated_at?: string;
+}
+
 interface DashboardData {
   totalProjects: number;
   pendingMaintenance: number;
   completedTasks: number;
   activeProjects: number;
-  recentProjects: any[];
+  recentProjects: Project[];
 }
 
 export const useDashboardData = () => {
@@ -29,7 +38,7 @@ export const useDashboardData = () => {
         // جلب بيانات المشاريع
         const { data: projects, error: projectsError } = await supabase
           .from('projects')
-          .select('*')
+          .select('id, name, status, location, created_at')
           .eq('is_deleted', false);
 
         if (projectsError) throw projectsError;
@@ -37,7 +46,7 @@ export const useDashboardData = () => {
         // جلب بيانات طلبات الصيانة
         const { data: maintenance, error: maintenanceError } = await supabase
           .from('maintenance_requests')
-          .select('*');
+          .select('id, status');
 
         if (maintenanceError) throw maintenanceError;
 
@@ -49,7 +58,7 @@ export const useDashboardData = () => {
 
         // آخر المشاريع (أحدث 5 مشاريع)
         const recentProjects = projects
-          ?.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+          ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           ?.slice(0, 5) || [];
 
         setData({
@@ -81,14 +90,14 @@ export const useDashboardData = () => {
               name: 'مشروع تطوير المكاتب الإدارية',
               status: 'active',
               location: 'الرياض',
-              updated_at: new Date().toISOString()
+              created_at: new Date().toISOString()
             },
             {
               id: '2',
               name: 'صيانة مبنى سكني',
               status: 'planning',
               location: 'جدة',
-              updated_at: new Date(Date.now() - 86400000).toISOString()
+              created_at: new Date(Date.now() - 86400000).toISOString()
             }
           ]
         });

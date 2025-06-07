@@ -10,7 +10,7 @@ interface Project {
   name: string;
   status: string;
   location: string;
-  updated_at: string;
+  created_at: string;
 }
 
 interface RecentProjectsProps {
@@ -101,7 +101,7 @@ const RecentProjects: React.FC<RecentProjectsProps> = ({ projects, isLoading }) 
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {new Date(project.updated_at).toLocaleDateString('ar-SA')}
+                    {new Date(project.created_at).toLocaleDateString('ar-SA')}
                   </div>
                 </div>
               </Link>
