@@ -1,0 +1,104 @@
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from "@/components/ui/use-toast";
+
+interface DashboardData {
+  totalProjects: number;
+  pendingMaintenance: number;
+  completedTasks: number;
+  activeProjects: number;
+  recentProjects: any[];
+}
+
+export const useDashboardData = () => {
+  const [data, setData] = useState<DashboardData>({
+    totalProjects: 0,
+    pendingMaintenance: 0,
+    completedTasks: 0,
+    activeProjects: 0,
+    recentProjects: []
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+
+        // جلب بيانات المشاريع
+        const { data: projects, error: projectsError } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('is_deleted', false);
+
+        if (projectsError) throw projectsError;
+
+        // جلب بيانات طلبات الصيانة
+        const { data: maintenance, error: maintenanceError } = await supabase
+          .from('maintenance_requests')
+          .select('*');
+
+        if (maintenanceError) throw maintenanceError;
+
+        // حساب الإحصائيات
+        const totalProjects = projects?.length || 0;
+        const activeProjects = projects?.filter(p => p.status === 'active').length || 0;
+        const pendingMaintenance = maintenance?.filter(m => m.status === 'pending').length || 0;
+        const completedTasks = maintenance?.filter(m => m.status === 'completed').length || 0;
+
+        // آخر المشاريع (أحدث 5 مشاريع)
+        const recentProjects = projects
+          ?.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+          ?.slice(0, 5) || [];
+
+        setData({
+          totalProjects,
+          pendingMaintenance,
+          completedTasks,
+          activeProjects,
+          recentProjects
+        });
+
+        console.log('تم تحميل بيانات لوحة التحكم بنجاح');
+      } catch (error) {
+        console.error('خطأ في جلب بيانات لوحة التحكم:', error);
+        toast({
+          title: "خطأ في تحميل البيانات",
+          description: "سيتم استخدام البيانات الافتراضية",
+          variant: "destructive",
+        });
+
+        // بيانات افتراضية في حالة الخطأ
+        setData({
+          totalProjects: 12,
+          pendingMaintenance: 8,
+          completedTasks: 45,
+          activeProjects: 6,
+          recentProjects: [
+            {
+              id: '1',
+              name: 'مشروع تطوير المكاتب الإدارية',
+              status: 'active',
+              location: 'الرياض',
+              updated_at: new Date().toISOString()
+            },
+            {
+              id: '2',
+              name: 'صيانة مبنى سكني',
+              status: 'planning',
+              location: 'جدة',
+              updated_at: new Date(Date.now() - 86400000).toISOString()
+            }
+          ]
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  return { data, isLoading };
+};
