@@ -23,6 +23,7 @@ const QuickRequestForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('QuickRequestForm: بدء إرسال النموذج', formData);
     await submitForm(formData, resetForm);
   };
 

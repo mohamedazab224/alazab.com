@@ -148,7 +148,7 @@ const Projects: React.FC = () => {
                         <span className="text-sm bg-white/20 backdrop-blur-sm px-2 py-1 rounded">سنة: {project.year}</span>
                         <span className="text-sm bg-white/20 backdrop-blur-sm px-2 py-1 rounded">العميل: {project.client}</span>
                       </div>
-                      <Link to={`/projects/${project.id}`} className="flex items-center gap-2 bg-white text-construction-primary font-bold py-2 px-4 rounded-md transition hover:bg-construction-accent hover:text-white self-start">
+                      <Link to={`/portfolio/${project.id}`} className="flex items-center gap-2 bg-white text-construction-primary font-bold py-2 px-4 rounded-md transition hover:bg-construction-accent hover:text-white self-start">
                         تفاصيل المشروع
                         <ArrowLeft size={16} />
                       </Link>
@@ -201,7 +201,7 @@ const Projects: React.FC = () => {
                   key={project.id} 
                   className="project-card group relative overflow-hidden rounded-lg shadow-md opacity-0 translate-y-8 transition-all duration-500"
                 >
-                  <Link to={`/projects/${project.id}`}>
+                  <Link to={`/portfolio/${project.id}`}>
                     <img 
                       src={project.image} 
                       alt={project.title} 

@@ -4,14 +4,24 @@ import { useNavigate } from 'react-router-dom';
 import { MaintenanceRequest, MaintenanceRequestDB, AttachmentDB } from '@/types/maintenance';
 import { sendEmail } from '@/lib/emailjs';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export const useQuickFormSubmit = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const submitForm = async (formData: MaintenanceRequest, resetForm: () => void) => {
+    console.log('useQuickFormSubmit: بدء عملية الإرسال', formData);
+    
     if (!formData.branch || !formData.serviceType || !formData.title || !formData.description) {
+      console.log('useQuickFormSubmit: بيانات مفقودة', { 
+        branch: formData.branch, 
+        serviceType: formData.serviceType, 
+        title: formData.title, 
+        description: formData.description 
+      });
+      
       toast({
         title: "خطأ في البيانات",
         description: "يرجى ملء جميع الحقول المطلوبة",
@@ -22,6 +32,7 @@ export const useQuickFormSubmit = () => {
     
     try {
       setIsSubmitting(true);
+      console.log('useQuickFormSubmit: بدء الحفظ في قاعدة البيانات');
 
       const uniqueId = Date.now().toString().slice(-6);
       const reqNumber = `QMR-${uniqueId}`;
@@ -53,6 +64,8 @@ export const useQuickFormSubmit = () => {
         created_at: new Date().toISOString(),
         created_by: 'anonymous'
       };
+
+      console.log('useQuickFormSubmit: بيانات الطلب المرسل', requestData);
         
       const { data: insertedRequest, error: dbError } = await supabase
         .from('maintenance_requests')
@@ -60,13 +73,17 @@ export const useQuickFormSubmit = () => {
         .select();
         
       if (dbError) {
-        console.error('خطأ في حفظ بيانات الطلب:', dbError);
+        console.error('useQuickFormSubmit: خطأ في حفظ بيانات الطلب:', dbError);
         throw new Error('فشل في حفظ الطلب');
       }
+      
+      console.log('useQuickFormSubmit: تم حفظ الطلب بنجاح', insertedRequest);
       
       const requestId = insertedRequest && insertedRequest[0] ? insertedRequest[0].id : reqNumber;
       
       if (formData.attachments.length > 0) {
+        console.log('useQuickFormSubmit: بدء رفع المرفقات', formData.attachments.length);
+        
         const uploadPromises = formData.attachments.map(async (file) => {
           const fileName = `${requestId}-${Date.now()}-${file.name}`;
           const { data, error } = await supabase.storage
@@ -74,7 +91,7 @@ export const useQuickFormSubmit = () => {
             .upload(fileName, file);
           
           if (error) {
-            console.error('خطأ في رفع المرفق:', error);
+            console.error('useQuickFormSubmit: خطأ في رفع المرفق:', error);
             return null;
           }
           
@@ -101,7 +118,9 @@ export const useQuickFormSubmit = () => {
             .insert(attachmentsData);
             
           if (attachError) {
-            console.error('خطأ في حفظ بيانات المرفقات:', attachError);
+            console.error('useQuickFormSubmit: خطأ في حفظ بيانات المرفقات:', attachError);
+          } else {
+            console.log('useQuickFormSubmit: تم حفظ المرفقات بنجاح');
           }
         }
       }
@@ -121,9 +140,11 @@ export const useQuickFormSubmit = () => {
       };
       
       try {
+        console.log('useQuickFormSubmit: بدء إرسال البريد الإلكتروني');
         await sendEmail(emailParams);
+        console.log('useQuickFormSubmit: تم إرسال البريد الإلكتروني بنجاح');
       } catch (emailError) {
-        console.error('خطأ في إرسال البريد الإلكتروني:', emailError);
+        console.error('useQuickFormSubmit: خطأ في إرسال البريد الإلكتروني:', emailError);
       }
       
       toast({
@@ -132,11 +153,13 @@ export const useQuickFormSubmit = () => {
         variant: "default",
       });
       
+      console.log('useQuickFormSubmit: تم إرسال الطلب بنجاح، رقم الطلب:', requestId);
+      
       resetForm();
       navigate(`/maintenance-tracking?requestNumber=${requestId}`);
       
     } catch (error) {
-      console.error('خطأ في إرسال الطلب:', error);
+      console.error('useQuickFormSubmit: خطأ في إرسال الطلب:', error);
       toast({
         title: "حدث خطأ",
         description: "لم نتمكن من إرسال طلبك. الرجاء المحاولة مرة أخرى.",
