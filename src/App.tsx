@@ -13,6 +13,7 @@ import ProjectPortfolioDetails from "./pages/ProjectPortfolioDetails";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import CEOPage from "./pages/CEOPage";
+import ChatbotPage from "./pages/ChatbotPage";
 import AuthPage from "./pages/AuthPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -33,6 +34,7 @@ function App() {
         <Route path="/maintenance-list" element={<MaintenanceList />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/chatbot" element={<ChatbotPage />} />
         <Route path="/project-management" element={
           <ProtectedRoute>
             <ProjectManagement />
