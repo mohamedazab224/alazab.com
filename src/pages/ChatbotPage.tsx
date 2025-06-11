@@ -17,7 +17,7 @@ const ChatbotPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'مرحباً! أنا AzaBot مساعدك الذكي في شركة العزب للمقاولات. كيف يمكنني مساعدتك اليوم؟',
+      text: 'مرحباً! أنا عزبوت (AzaBot) مساعدك الذكي في شركة العزب للمقاولات. كيف يمكنني مساعدتك اليوم؟',
       sender: 'bot',
       timestamp: new Date()
     }
@@ -48,43 +48,17 @@ const ChatbotPage: React.FC = () => {
     setInputMessage('');
     setIsLoading(true);
 
-    // محاكاة استجابة الشات بوت
+    // TODO: هنا يجب دمج عزبوت المخصص بدلاً من الردود الوهمية
     setTimeout(() => {
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: getBotResponse(inputMessage),
+        text: 'أعتذر، عزبوت المخصص غير متصل حالياً. يرجى التواصل مع المطور لدمج النموذج المدرب.',
         sender: 'bot',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, botResponse]);
       setIsLoading(false);
     }, 1500);
-  };
-
-  const getBotResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('صيانة') || input.includes('maintenance')) {
-      return 'يمكنك تقديم طلب صيانة من خلال النموذج المخصص في موقعنا. نحن نقدم خدمات صيانة شاملة للمباني والمنشآت. هل تحتاج مساعدة في ملء النموذج؟';
-    }
-    
-    if (input.includes('مشروع') || input.includes('project')) {
-      return 'شركة العزب تنفذ مشاريع متنوعة في المقاولات العامة والبناء. يمكنك الاطلاع على معرض مشاريعنا أو التواصل معنا لمناقشة مشروعك الجديد.';
-    }
-    
-    if (input.includes('خدمات') || input.includes('services')) {
-      return 'نقدم خدمات شاملة تشمل: المقاولات العامة، أعمال البناء والتشييد، أعمال الكهرباء والسباكة، التشطيبات، وخدمات الصيانة. أي خدمة تهتم بمعرفة المزيد عنها؟';
-    }
-    
-    if (input.includes('تواصل') || input.includes('contact')) {
-      return 'يمكنك التواصل معنا عبر: الهاتف، البريد الإلكتروني، أو زيارة مكاتبنا. تجد جميع معلومات التواصل في صفحة "اتصل بنا" على الموقع.';
-    }
-    
-    if (input.includes('مرحبا') || input.includes('السلام') || input.includes('hello')) {
-      return 'أهلاً وسهلاً بك! أنا هنا لمساعدتك في أي استفسار حول خدمات شركة العزب للمقاولات. ما الذي تود معرفته؟';
-    }
-    
-    return 'شكراً لك على تواصلك معنا. فريق خدمة العملاء سيتواصل معك قريباً للإجابة على استفسارك بالتفصيل. في غضون ذلك، يمكنك تصفح موقعنا لمعرفة المزيد عن خدماتنا.';
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -94,12 +68,25 @@ const ChatbotPage: React.FC = () => {
   };
 
   return (
-    <PageLayout title="دردشة مع AzaBot">
-      <div className="max-w-4xl mx-auto">
-        <Card className="h-[600px] flex flex-col">
-          <CardContent className="flex-1 p-0 flex flex-col">
-            {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-2xl font-bold text-construction-primary text-center">
+            دردشة مع عزبوت - AzaBot
+          </h1>
+          <p className="text-center text-gray-600 text-sm mt-1">
+            مساعدك الذكي في شركة العزب للمقاولات
+          </p>
+        </div>
+      </div>
+
+      {/* Chat Container */}
+      <div className="max-w-4xl mx-auto px-4 py-4 h-screen flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Messages Container */}
+          <div className="flex-1 overflow-y-auto bg-white rounded-lg shadow-sm border border-gray-200 mb-4">
+            <div className="p-4 space-y-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -145,7 +132,7 @@ const ChatbotPage: React.FC = () => {
                   <div className="bg-gray-100 p-3 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm text-gray-600">جاري الكتابة...</span>
+                      <span className="text-sm text-gray-600">عزبوت يكتب...</span>
                     </div>
                   </div>
                 </div>
@@ -153,38 +140,38 @@ const ChatbotPage: React.FC = () => {
               
               <div ref={messagesEndRef} />
             </div>
-            
-            {/* Chat Input */}
-            <div className="border-t p-4">
-              <div className="flex gap-2">
-                <Input
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="اكتب رسالتك هنا..."
-                  disabled={isLoading}
-                  className="flex-1"
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!inputMessage.trim() || isLoading}
-                  className="bg-construction-primary hover:bg-construction-primary/90"
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
+          </div>
+          
+          {/* Input Area */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex gap-2">
+              <Input
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="اكتب رسالتك هنا..."
+                disabled={isLoading}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={!inputMessage.trim() || isLoading}
+                className="bg-construction-primary hover:bg-construction-primary/90"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
         
-        {/* Chat Info */}
-        <div className="mt-6 text-center">
+        {/* Info */}
+        <div className="text-center mt-4">
           <p className="text-sm text-gray-600">
-            AzaBot هو مساعد ذكي لخدمة العملاء. للاستفسارات المعقدة، يرجى التواصل مع فريق خدمة العملاء مباشرة.
+            عزبوت هو مساعد ذكي مدرب خصيصاً لشركة العزب للمقاولات. للاستفسارات المعقدة، يرجى التواصل مع فريق خدمة العملاء مباشرة.
           </p>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 
