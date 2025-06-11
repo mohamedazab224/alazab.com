@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MaintenanceRequest, MaintenanceRequestDB, AttachmentDB } from '@/types/maintenance';
+import { MaintenanceRequest } from '@/types/maintenance';
 import { sendEmail } from '@/lib/emailjs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
@@ -52,7 +52,8 @@ export const useQuickFormSubmit = () => {
         ? parseFloat(formData.estimatedCost)
         : null;
       
-      const requestData: MaintenanceRequestDB = {
+      // إنشاء كائن البيانات بدون الحقول التي تسبب مشاكل
+      const requestData = {
         title: formData.title,
         service_type: formData.serviceType,
         description: formData.description,
@@ -60,9 +61,7 @@ export const useQuickFormSubmit = () => {
         scheduled_date: formData.requestedDate,
         estimated_cost: estimatedCost,
         status: 'pending',
-        store_id: storeId,
-        created_at: new Date().toISOString(),
-        created_by: 'anonymous'
+        store_id: storeId
       };
 
       console.log('useQuickFormSubmit: بيانات الطلب المرسل', requestData);
@@ -81,6 +80,7 @@ export const useQuickFormSubmit = () => {
       
       const requestId = insertedRequest && insertedRequest[0] ? insertedRequest[0].id : reqNumber;
       
+      // رفع المرفقات إذا وجدت
       if (formData.attachments.length > 0) {
         console.log('useQuickFormSubmit: بدء رفع المرفقات', formData.attachments.length);
         
@@ -106,11 +106,10 @@ export const useQuickFormSubmit = () => {
         const validFiles = uploadedFiles.filter(Boolean);
         
         if (validFiles.length > 0) {
-          const attachmentsData: AttachmentDB[] = validFiles.map((file) => ({
+          const attachmentsData = validFiles.map((file) => ({
             request_id: requestId,
             file_url: file?.url || '',
-            description: `مرفق للطلب ${formData.title}`,
-            uploaded_at: new Date().toISOString()
+            description: `مرفق للطلب ${formData.title}`
           }));
           
           const { error: attachError } = await supabase
@@ -125,6 +124,7 @@ export const useQuickFormSubmit = () => {
         }
       }
       
+      // إرسال البريد الإلكتروني
       const emailParams = {
         request_number: requestId,
         branch: formData.branch,
